@@ -35,6 +35,7 @@ public interface CustomerService {
 	
 	public Customer getCustomerByUsernameAndPassword(String username, String password);
 	
+	// TODO:  Need to move these out of CustomerService interface, but for now keeping here so I don't have to restructure code between projects
 	public CustomerSession validateSession(String sessionid);
 	
 	public CustomerSession createSession(String customerId);

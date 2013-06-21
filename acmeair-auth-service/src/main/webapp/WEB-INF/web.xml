@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	version="3.0">
-	<display-name>scale-webapp</display-name>
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<display-name>acmeair-auth-service</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
@@ -27,45 +27,35 @@
 		be specified for component-scanning -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>com.acmeair.web.config.WXSDirectAppConfig</param-value>
+		<param-value>com.acmeair.services.authService.WXSFlatAppConfig</param-value>
 	</context-param>
-
-	<filter>
-    	<filter-name>CookieFilter</filter-name>
-    	<filter-class>com.acmeair.web.RESTCookieSessionFilter</filter-class>
-	</filter>
-	<filter-mapping>
-    	<filter-name>CookieFilter</filter-name>
-    	<url-pattern>/rest/api/*</url-pattern>
-	</filter-mapping>
 
 	<!-- Bootstrap the root application context as usual using ContextLoaderListener -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-	
+
 	<listener>
-		<listener-class>com.acmeair.web.KaryonListener</listener-class>
-	</listener>	
-	
+		<listener-class>com.acmeair.services.KaryonListener</listener-class>
+	</listener>
+		
 	<servlet>
-		<servlet-name>javax.ws.rs.core.Application</servlet-name>
-	</servlet>
-	
-	<servlet>
-        <display-name>HystrixMetricsStreamServlet</display-name>
-        <servlet-name>HystrixMetricsStreamServlet</servlet-name>
-        <servlet-class>com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet</servlet-class>
+  		<servlet-name>jersey-servlet</servlet-name>
+  		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+  		<init-param>
+  			<param-name>com.sun.jersey.config.property.packages</param-name>
+  			<param-value>com.acmeair.services.authService</param-value>
+  		</init-param>
+		<init-param>
+  			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+  			<param-value>true</param-value>
+  		</init-param>
+  		<load-on-startup>1</load-on-startup>
     </servlet>
     
 	<servlet-mapping>
-		<servlet-name>javax.ws.rs.core.Application</servlet-name>
+		<servlet-name>jersey-servlet</servlet-name>
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
-	
-    <servlet-mapping>
-        <servlet-name>HystrixMetricsStreamServlet</servlet-name>
-        <url-pattern>/hystrix.stream</url-pattern>
-    </servlet-mapping>	
-	
+
 </web-app>

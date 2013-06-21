@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.acmeair.entities.CustomerSession;
-import com.acmeair.service.CustomerService;
-import com.acmeair.wxs.utils.TransactionService;
+import com.acmeair.web.hystrixcommands.ValidateTokenCommand;
+import com.acmeair.wxs.utils.*;
 
 public class RESTCookieSessionFilter implements Filter {
 	
@@ -37,7 +37,6 @@ public class RESTCookieSessionFilter implements Filter {
 	private static final String LOGIN_PATH = "/rest/api/login";
 	private static final String LOGOUT_PATH = "/rest/api/login/logout";
 	
-	private CustomerService customerService = ServiceLocator.getService(CustomerService.class);
 	private TransactionService transactionService = null; 
 	private boolean initializedTXService = false;
 	
@@ -57,6 +56,7 @@ public class RESTCookieSessionFilter implements Filter {
 	}
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp,	FilterChain chain) throws IOException, ServletException {
+		try {
 		HttpServletRequest request = (HttpServletRequest)req;
 		HttpServletResponse response = (HttpServletResponse)resp;
 		
@@ -97,7 +97,8 @@ public class RESTCookieSessionFilter implements Filter {
 				return;
 			}
 			// Need the URLDecoder so that I can get @ not %40
-			CustomerSession cs = customerService.validateSession(sessionId);
+				ValidateTokenCommand validateCommand = new ValidateTokenCommand(sessionId);
+				CustomerSession cs = validateCommand.execute();
 			if (cs != null) {
 				request.setAttribute(LOGIN_USER, cs.getCustomerid());
 				chain.doFilter(req, resp);
@@ -111,6 +112,10 @@ public class RESTCookieSessionFilter implements Filter {
 		
 		// if we got here, we didn't detect the session cookie, so we need to return 404
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
+		}
+		catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
 	}
 
 	@Override

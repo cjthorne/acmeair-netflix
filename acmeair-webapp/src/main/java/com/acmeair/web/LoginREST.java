@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.acmeair.entities.CustomerSession;
 import com.acmeair.service.*;
-
+import com.acmeair.web.hystrixcommands.*;
 
 
 @Path("/login")
@@ -43,8 +43,10 @@ public class LoginREST {
 			if (!validCustomer) {
 				return Response.status(Response.Status.FORBIDDEN).build();
 			}
+
+			CreateTokenCommand create = new CreateTokenCommand(login);
+			CustomerSession session = create.execute();
 			
-			CustomerSession session = customerService.createSession(login);
 			// TODO:  Need to fix the security issues here - they are pretty gross likely
 			NewCookie sessCookie = new NewCookie(SESSIONID_COOKIE_NAME, session.getId());
 			// TODO: The mobile client app requires JSON in the response. 
@@ -66,7 +68,8 @@ public class LoginREST {
 	@Produces("text/plain")
 	public Response logout(@QueryParam("login") String login, @CookieParam("sessionid") String sessionid) {
 		try {
-			customerService.invalidateSession(sessionid);
+			InvalidateTokenCommand invalidateCommand = new InvalidateTokenCommand(sessionid);
+			invalidateCommand.execute();
 			// The following call will trigger query against all partitions, disable for now
 //			customerService.invalidateAllUserSessions(login);
 			

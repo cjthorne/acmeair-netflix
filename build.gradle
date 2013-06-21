@@ -1,0 +1,154 @@
+buildscript {
+    repositories { mavenCentral() }
+}
+
+def M2_REPO = System.getenv("M2_REPO")
+allprojects {
+    repositories {
+		mavenCentral()
+		maven {
+			url "$M2_REPO"
+		}
+	}
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	
+    group = "com.acmeair.${rootProject.name}"
+    version = rootProject.version
+    sourceCompatibility = 1.6
+    
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.2'
+        compile 'io.netty:netty:3.6.1.Final'
+        compile 'com.netflix.servo:servo-core:0.4.32'
+        compile 'com.google.guava:guava:11.0.2'
+        compile 'com.google.inject:guice:3.0'
+        compile 'com.netflix.archaius:archaius-core:0.5.4'
+        compile 'com.netflix.netflix-commons:netflix-commons-util:0.1.1'
+        compile 'javax.ws.rs:jsr311-api:1.1.1' 
+        compile 'commons-collections:commons-collections:3.2.1'
+        compile 'com.sun.jersey:jersey-server:1.13'
+        compile 'com.sun.jersey:jersey-core:1.13'
+        compile 'com.sun.jersey:jersey-bundle:1.13'
+        compile 'com.sun.jersey.contribs:jersey-guice:1.13'
+        compile 'com.netflix.eureka:eureka-client:1.1.73'
+        compile 'com.netflix.blitz4j:blitz4j:1.21'
+        compile 'jetty:jetty:6.0.2'
+        compile 'jetty:servlet-api:2.5-6.0.2'
+        compile 'jetty:jetty-util:6.0.2'
+        compile 'jetty:jsp:2.1-6.0.2'
+        compile 'jetty:jsp-api:2.1-6.0.2'
+        compile 'com.netflix.hystrix:hystrix-core:1.2.5'
+        compile 'com.netflix.hystrix:hystrix-metrics-event-stream:1.2.5'
+        compile 'com.netflix.hystrix:hystrix-servo-metrics-publisher:1.2.5'
+        compile 'com.netflix.ribbon:ribbon-core:0.1.2'
+        compile 'com.netflix.ribbon:ribbon-eureka:0.1.2'
+        compile 'com.netflix.ribbon:ribbon-httpclient:0.1.2'
+        compile 'com.netflix.governator:governator:1.0.3'
+        compile 'com.netflix.karyon:karyon-core:1.0.2'
+        compile 'com.netflix.karyon:karyon-admin-web:1.0.2'
+
+        runtime 'org.slf4j:slf4j-log4j12:1.6.1'
+        runtime 'org.apache.maven.plugins:maven-antrun-plugin:1.6'
+    }
+}	
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '1.6'
+}
+
+project(':acmeair-common') {
+	dependencies {
+		compile 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.1'
+	}
+}
+
+project(':acmeair-services') {
+	dependencies {
+		compile project(':acmeair-common')
+		compile 'org.springframework:spring-context:3.1.2.RELEASE'
+		testCompile 'cglib:cglib:2.2.2'
+	}
+}
+
+project(':acmeair-services-wxs') {
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+		compile 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.1'
+		compile 'org.springframework:spring-tx:3.1.2.RELEASE'
+        compile 'junit:junit:3.8.1'
+		compile 'org.testng:testng:6.4'
+	}
+}
+
+project(':acmeair-webapp') {
+	apply plugin: 'war'
+
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+		compile project(':acmeair-services-wxs')
+		compile project(':acmeair-loader')
+		compile 'commons-io:commons-io:2.4'
+		compile 'org.springframework:spring-context:3.1.2.RELEASE'
+		runtime 'org.springframework:spring-context:3.1.2.RELEASE'
+		runtime 'org.springframework:spring-web:3.1.2.RELEASE'
+		runtime 'cglib:cglib:2.2.2'
+		runtime 'org.aspectj:aspectjrt:1.6.8'
+		runtime 'org.aspectj:aspectjweaver:1.6.8'
+		runtime 'com.sun.jersey:jersey-json:1.17.1'
+		providedRuntime 'jetty:jetty:6.0.2'
+        providedRuntime 'jetty:servlet-api:2.5-6.0.2'
+        providedRuntime 'jetty:jetty-util:6.0.2'
+        providedRuntime 'jetty:jsp:2.1-6.0.2'
+        providedRuntime 'jetty:jsp-api:2.1-6.0.2'
+		providedRuntime 'javax.servlet:servlet-api:2.5'
+	}
+}
+
+project(':acmeair-auth-service') {
+	apply plugin: 'war'
+
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+		compile project(':acmeair-services-wxs')
+		compile 'org.springframework:spring-context:3.1.2.RELEASE'
+		runtime 'org.springframework:spring-context:3.1.2.RELEASE'
+		runtime 'org.springframework:spring-web:3.1.2.RELEASE'
+		runtime 'cglib:cglib:2.2.2'
+		runtime 'org.aspectj:aspectjrt:1.6.8'
+		runtime 'org.aspectj:aspectjweaver:1.6.8'
+		runtime 'com.sun.jersey:jersey-json:1.17.1'
+		providedRuntime 'jetty:jetty:6.0.2'
+        providedRuntime 'jetty:servlet-api:2.5-6.0.2'
+        providedRuntime 'jetty:jetty-util:6.0.2'
+        providedRuntime 'jetty:jsp:2.1-6.0.2'
+        providedRuntime 'jetty:jsp-api:2.1-6.0.2'
+		providedRuntime 'javax.servlet:servlet-api:2.5'
+	}
+}
+
+project(':acmeair-loader') {
+	apply plugin: 'application'
+	mainClassName = 'com.acmeair.loader.Loader'
+	
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+		compile project(':acmeair-services-wxs')
+		compile 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.1'
+		compile 'org.springframework:spring-context:3.1.2.RELEASE'
+	}
+}
+
+project(':acmeair-driver') {
+	dependencies {
+		compile 'com.googlecode.json-simple:json-simple:1.1.1'
+		compile 'org.apache.jmeter:ApacheJMeter_core:2.7'
+	}
+}

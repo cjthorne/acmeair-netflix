@@ -217,7 +217,13 @@ public class WXSSessionManager implements InitializingBean, TransactionService{
 				txManager=null;
 				log.info("Session will be created from ObjectGrid directly w/o tx support.");
 			}
-			prepareForTransaction(); 
+			try {
+				prepareForTransaction();
+			}
+			catch (ObjectGridRuntimeException e) {
+				System.out.println("***** error creating WXSSessionManager, errors will likely occur upon use");
+				e.printStackTrace();
+			}
 		}
 		
 		// This method needs to be called by the client from its thread before triggering a service with @Transactional annotation
