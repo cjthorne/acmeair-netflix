@@ -59,7 +59,7 @@ public class LoginREST {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			return Response.serverError().build();
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class LoginREST {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			return Response.serverError().build();
 		}
 	}
 }
