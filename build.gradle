@@ -152,3 +152,12 @@ project(':acmeair-driver') {
 		compile 'org.apache.jmeter:ApacheJMeter_core:2.7'
 	}
 }
+
+task acmeairNetflixZip(type:Zip) {
+	from ('.')
+	include '**'
+	exclude '.metadata', '.gradle', 'acmeair-webapp', 'acmeair-auth-service'
+	into 'acmeair-netflix'
+	destinationDir new File('..')
+	archiveName 'acmeair-netflix-1.zip'
+}
