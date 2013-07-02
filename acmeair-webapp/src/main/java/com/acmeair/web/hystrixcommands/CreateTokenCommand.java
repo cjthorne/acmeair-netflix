@@ -25,11 +25,16 @@ import com.netflix.niws.client.http.RestClient;
 import com.netflix.client.ClientFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.common.base.Charsets;
 import com.acmeair.entities.*;
+
 import org.codehaus.jackson.map.*;
 
 public class CreateTokenCommand extends HystrixCommand<CustomerSession> {
+	private static final Log log = LogFactory.getLog(CreateTokenCommand.class);
 	private String userid;
 	
 	public CreateTokenCommand(String userid) {
@@ -45,7 +50,7 @@ public class CreateTokenCommand extends HystrixCommand<CustomerSession> {
 		HttpClientResponse response = client.executeWithLoadBalancer(request);
 		
 		String responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
-		System.out.println("responseString = " + responseString);
+		log.debug("responseString = " + responseString);
 		ObjectMapper mapper = new ObjectMapper();
 		CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
 		return cs;

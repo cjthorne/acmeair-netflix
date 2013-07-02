@@ -120,6 +120,7 @@ public class WXSSessionManager implements InitializingBean, TransactionService{
 				}
 				return gridToReturn;
 			} catch (Exception e) {
+				log.error(e);
 				throw new ObjectGridRuntimeException("Unable to connect to catalog server at endpoints:" + cep,	e);
 			}
 		}
@@ -206,9 +207,9 @@ public class WXSSessionManager implements InitializingBean, TransactionService{
 			this.txManager = txManager;
 		}
 		
-		
 		@Override
 		public void afterPropertiesSet() throws ObjectGridException {
+			log.debug("afterPropertiesSet being called");
 			if (!integrateWithWASTransactions && txManager!=null) // Using Spring TX if WAS TX is not enabled
 			{
 				log.info("Session will be created from SpringLocalTxManager w/ tx support.");
@@ -220,9 +221,9 @@ public class WXSSessionManager implements InitializingBean, TransactionService{
 			try {
 				prepareForTransaction();
 			}
-			catch (ObjectGridRuntimeException e) {
-				System.out.println("***** error creating WXSSessionManager, errors will likely occur upon use");
-				e.printStackTrace();
+			catch (Exception e) {
+				log.error("***** error creating WXSSessionManager, errors will likely occur upon use");
+				log.error(e);
 			}
 		}
 		

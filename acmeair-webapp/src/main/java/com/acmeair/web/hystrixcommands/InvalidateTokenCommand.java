@@ -18,6 +18,9 @@ package com.acmeair.web.hystrixcommands;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.common.base.Charsets;
 import com.netflix.client.ClientFactory;
 import com.netflix.hystrix.HystrixCommand;
@@ -28,6 +31,7 @@ import com.netflix.niws.client.http.RestClient;
 import com.netflix.niws.client.http.HttpClientRequest.Verb;
 
 public class InvalidateTokenCommand extends HystrixCommand<Void> {
+	private static final Log log = LogFactory.getLog(InvalidateTokenCommand.class);
 	private String tokenid;
 	
 	public InvalidateTokenCommand(String tokenid) {
@@ -43,7 +47,7 @@ public class InvalidateTokenCommand extends HystrixCommand<Void> {
 		HttpClientResponse response = client.executeWithLoadBalancer(request);
 		
 		String responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
-		System.out.println("responseString = " + responseString);
+		log.debug("responseString = " + responseString);
 		return null;
 	}
 	

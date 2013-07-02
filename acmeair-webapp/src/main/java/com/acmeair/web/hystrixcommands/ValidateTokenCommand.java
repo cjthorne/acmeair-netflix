@@ -18,6 +18,8 @@ package com.acmeair.web.hystrixcommands;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.acmeair.entities.CustomerSession;
@@ -31,6 +33,7 @@ import com.netflix.niws.client.http.RestClient;
 import com.netflix.niws.client.http.HttpClientRequest.Verb;
 
 public class ValidateTokenCommand extends HystrixCommand<CustomerSession> {
+	private static final Log log = LogFactory.getLog(ValidateTokenCommand.class);
 	private String tokenid;
 	
 	public ValidateTokenCommand(String tokenid) {
@@ -46,7 +49,7 @@ public class ValidateTokenCommand extends HystrixCommand<CustomerSession> {
 		HttpClientResponse response = client.executeWithLoadBalancer(request);
 		
 		String responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
-		System.out.println("responseString = " + responseString);
+		log.debug("responseString = " + responseString);
 		ObjectMapper mapper = new ObjectMapper();
 		CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
 		return cs;
