@@ -1,0 +1,151 @@
+// *****************************************************************************
+// Copyright (c) 2013 IBM Corp.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ****************************************************************************/
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath group: 'net.schmizz', name: 'sshj', version: '0.8.1'
+		classpath group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
+		classpath group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.3.12'
+		classpath group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.8'
+		classpath group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.8'
+		classpath group: 'org.codehaus.gpars', name: 'gpars', version: '0.12'
+	}
+}
+
+import net.schmizz.sshj.SSHClient;
+import java.security.PublicKey
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+import net.schmizz.sshj.common.IOUtils;
+import net.schmizz.sshj.xfer.FileSystemFile;
+import java.util.concurrent.TimeUnit;
+import groovyx.gpars.GParsPool;
+
+def config = new ConfigSlurper().parse(new File('cloud.groovy').toURL())
+println("$config")
+
+class Instance {
+	String name
+	String publicIpAddress
+}
+
+task cloud {
+	description = "creates cloud config"
+	doLast {
+		def ips = config.cloud.hardCodedJMeterInstanceList
+		cloud.instances = []
+		ips.each {
+			cloud.instances.add(new Instance(publicIpAddress:"$it"))
+		}				
+	}
+}
+
+class Verifier implements HostKeyVerifier {
+	public boolean verify(String hostname,
+		int port,
+		PublicKey key) {
+		return true
+	}
+}
+
+def sshExec(config, instances, sshClientClosure, sshExecCmdClosure, timeout =30) {
+	if (instances.size() < 1) throw Exception("No cloud instances found for your scale system.")
+	GParsPool.withPool 15, {
+		instances.eachParallel {
+			def host = it.getPublicIpAddress()
+
+			def client = new SSHClient()
+			client.addHostKeyVerifier(new Verifier())
+			
+			println("SSHExec on $host for user = $config.cloud.user" )
+			client.connect("$host")
+			
+			println("using keyfile for SSH => $config.cloud.keyFile")
+			def keys = client.loadKeys("$config.cloud.keyFile")
+			client.authPublickey("$config.cloud.user", keys)
+			
+			// First allow access to sshClient to perform SCP operations
+			sshClientClosure(client)
+			
+			// Now configure the instance
+			def session = client.startSession();
+			// Issue the command here, and wait for results, allowing the Command to be built dynamically
+			def cmd = session.exec(sshExecCmdClosure(host));
+			cmd.join(timeout, TimeUnit.SECONDS);
+			println("$host:\n" + IOUtils.readFully(cmd.getInputStream()).toString())
+			session.close()
+			client.disconnect()
+		}
+	}
+}
+
+task ("startJMeterCluster", dependsOn : [cloud]) {
+	doLast {
+		// note - for sshExec to work this way, we need to make the following changes to /etc/sudoers
+		// the first allows the ssh to sudo without a tty.  the second allows ec2-user to sudo any command
+		// #Defaults    requiretty
+		// ec2-user        ALL=(ALL)       ALL
+		
+		def cmd = "";
+		cmd = "cd /opt/acmeair-netflix/acmeair-driver/src/main/scripts;"
+		cmd = cmd + "sudo killall -9 java;"
+		cmd = cmd + "sudo pwd;"
+		cmd = cmd + "sudo chmod +x runjmeter.sh;"
+		cmd = cmd + "sudo ./runjmeter.sh;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			cloud.instances,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("updateJMeterHosts", dependsOn : [cloud]) {
+	doLast {
+		new File('hosts.csv.updated').withWriter {
+			out -> config.cloud.elbOrDirectToAppServerInstanceListForJMeterHosts.each {
+      			out.println it
+      		}
+    	}
+    	
+		def cmd = "";
+		cmd = "sudo cp -v ~ec2-user/hosts.csv.updated /opt/acmeair-netflix/acmeair-driver/src/main/scripts/hosts.csv;"
+    	sshExec(
+    		config,
+			cloud.instances,
+			{client -> client.newSCPFileTransfer().upload(new FileSystemFile("hosts.csv.updated"), 'hosts.csv.updated');},
+			{privateIp -> cmd}, 10
+		)
+	}
+}
+
+task ("killJMeterCluster", dependsOn : [cloud]) {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "sudo killall -9 java;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			cloud.instances,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
