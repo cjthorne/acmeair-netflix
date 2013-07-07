@@ -25,6 +25,8 @@ buildscript {
 		classpath group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.8'
 		classpath group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.8'
 		classpath group: 'org.codehaus.gpars', name: 'gpars', version: '0.12'
+		
+		classpath group: 'org.codehaus.groovy.modules.http-builder', name: 'http-builder', version: '0.6'
 	}
 }
 
@@ -36,8 +38,11 @@ import net.schmizz.sshj.xfer.FileSystemFile;
 import java.util.concurrent.TimeUnit;
 import groovyx.gpars.GParsPool;
 
+import groovyx.net.http.RESTClient
+import groovy.util.slurpersupport.GPathResult
+import static groovyx.net.http.ContentType.URLENC
+
 def config = new ConfigSlurper().parse(new File('cloud.groovy').toURL())
-println("$config")
 
 class Instance {
 	String name
@@ -147,5 +152,44 @@ task ("killJMeterCluster", dependsOn : [cloud]) {
 			{client -> },
 			{privateIp -> cmd },300
 		)
+	}
+}
+
+def getClusterInfo(clusterName, skipUnderscore = false) {
+		def clusterList = new ArrayList()
+		def rest = new RESTClient('http://' + asgardHostPort + '/')
+		rest.auth.basic asgardUser, asgardPass
+		try {
+			rest.get(path : 'us-east-1/cluster/show/acmeair' + (skipUnderscore ? '' : '_') + clusterName + '.json') { resp1, clusterData ->
+				//println(clusterData)
+			
+				for (int ii = 0; ii < clusterData.instances[0].size(); ii++) {
+					def instanceUrl = 'us-east-1/instance/show/' + (clusterData.instances[0])[ii].instanceId + '.json'
+					rest.get(path : instanceUrl) { resp2, instanceData ->
+						//println(instanceData)
+						clusterList.add(instanceData.instance.privateIpAddress)
+					}
+				}
+			}
+			return clusterList
+		}
+		catch(e) {
+			println(e);
+		}
+}
+
+task ("getCurrentAcmeAirConfigFromAsgard") {
+	doLast {
+		if (!project.hasProperty('asgardHostPort') || !project.hasProperty('asgardUser') || !project.hasProperty('asgardPass')) {
+			throw new GradleException("usage:  gradlew getCurrentAcmeAirConfigFromAsgard -PasgardHostPort=1.1.1.1:8080 -PasgardUser=username -PasgardPass=password");
+		}
+		def driverList = getClusterInfo('driver');
+		println('hard_coded_list_cluster_driver = ' + driverList);
+		def webAppList = getClusterInfo('webapp', true);
+		println('hard_coded_list_cluster_webapp = ' + webAppList);
+		def authServiceList = getClusterInfo('auth_service');
+		println('hard_coded_list_cluster_auth_service = ' + authServiceList);
+		def wxsContainerList = getClusterInfo('wxs_container');
+		println('hard_coded_list_cluster_wxs_container = ' + wxsContainerList);
 	}
 }
