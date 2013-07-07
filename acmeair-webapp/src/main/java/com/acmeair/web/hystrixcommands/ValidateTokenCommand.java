@@ -27,6 +27,10 @@ import com.google.common.base.Charsets;
 import com.netflix.client.ClientFactory;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixThreadPoolKey;
+import com.netflix.hystrix.HystrixThreadPoolProperties;
+import com.netflix.hystrix.HystrixCommand.Setter;
 import com.netflix.niws.client.http.HttpClientRequest;
 import com.netflix.niws.client.http.HttpClientResponse;
 import com.netflix.niws.client.http.RestClient;
@@ -37,26 +41,40 @@ public class ValidateTokenCommand extends HystrixCommand<CustomerSession> {
 	private String tokenid;
 	
 	public ValidateTokenCommand(String tokenid) {
-        super (HystrixCommandGroupKey.Factory.asKey("AcmeAirGroup"));
+		super (Setter.
+				withGroupKey(HystrixCommandGroupKey.Factory.asKey(CommandConstants.COMMAND_GROUP_KEY)).
+				andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(CommandConstants.THREAD_POOL_KEY)).
+				andThreadPoolPropertiesDefaults(
+						HystrixThreadPoolProperties.Setter().
+							withCoreSize(CommandConstants.THREAD_POOL_CORE_SIZE)));
         this.tokenid = tokenid;
 	}
 	
 	@Override
 	protected CustomerSession run() throws Exception {
-		RestClient client = (RestClient) ClientFactory.getNamedClient("acmeair-auth-service-client");
-
-		HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.GET).setUri(new URI("/acmeair-auth-service-0.1.0-SNAPSHOT/rest/api/authtoken/" + tokenid)).build();
-		HttpClientResponse response = client.executeWithLoadBalancer(request);
-		
-		String responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
-		log.debug("responseString = " + responseString);
-		ObjectMapper mapper = new ObjectMapper();
-		CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
-		return cs;
+		String responseString = null;
+		try {
+			RestClient client = (RestClient) ClientFactory.getNamedClient(CommandConstants.ACME_AIR_AUTH_SERVICE_NAMED_CLIENT);
+	
+			HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.GET).setUri(new URI(CommandConstants.ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH + "/authtoken/" + tokenid)).build();
+			HttpClientResponse response = client.executeWithLoadBalancer(request);
+			
+			responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
+			log.debug("responseString = " + responseString);
+			ObjectMapper mapper = new ObjectMapper();
+			CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
+			return cs;
+		}
+		catch (Throwable t) {
+			log.error("caught exception", t);
+			log.error("responseString = " + responseString);
+			throw new Exception(t);
+		}
 	}
 	
 	@Override
 	protected CustomerSession getFallback() {
+		log.error("calling ValidateTokenCommand fallback");
 		return new CustomerSession();
 	}
 }

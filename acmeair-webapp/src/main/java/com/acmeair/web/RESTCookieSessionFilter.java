@@ -27,11 +27,15 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.acmeair.entities.CustomerSession;
 import com.acmeair.web.hystrixcommands.ValidateTokenCommand;
 import com.acmeair.wxs.utils.*;
 
 public class RESTCookieSessionFilter implements Filter {
+	private static final Log log = LogFactory.getLog(RESTCookieSessionFilter.class);
 	
 	static final String LOGIN_USER = "acmeair.login_user";
 	private static final String LOGIN_PATH = "/rest/api/login";
@@ -90,9 +94,13 @@ public class RESTCookieSessionFilter implements Filter {
 			String sessionId = "";
 			if (sessionCookie!=null) // We need both cookie to work
 				sessionId= sessionCookie.getValue().trim();
+			else {
+				log.info("falling through with a sessionCookie break, but it was null");
+			}
 			// did this check as the logout currently sets the cookie value to "" instead of aging it out
 			// see comment in LogingREST.java
 			if (sessionId.equals("")) {
+				log.info("sending SC_FORBIDDEN due to empty session cookie");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
@@ -105,12 +113,14 @@ public class RESTCookieSessionFilter implements Filter {
 				return;
 			}
 			else {
+				log.info("sending SC_FORBIDDEN due  to validateCommand returning null");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}
 		}
 		
-		// if we got here, we didn't detect the session cookie, so we need to return 404
+		// if we got here, we didn't detect the session cookie, so we need to return 403
+		log.info("sending SC_FORBIDDEN due finding no sessionCookie");
 		response.sendError(HttpServletResponse.SC_FORBIDDEN);
 		}
 		catch (Exception e) {

@@ -18,6 +18,7 @@ package com.acmeair.web.hystrixcommands;
 import java.net.URI;
 
 import com.netflix.hystrix.*;
+import com.netflix.hystrix.HystrixCommand.Setter;
 import com.netflix.niws.client.http.HttpClientRequest;
 import com.netflix.niws.client.http.HttpClientRequest.Verb;
 import com.netflix.niws.client.http.HttpClientResponse;
@@ -38,26 +39,40 @@ public class CreateTokenCommand extends HystrixCommand<CustomerSession> {
 	private String userid;
 	
 	public CreateTokenCommand(String userid) {
-        super (HystrixCommandGroupKey.Factory.asKey("AcmeAirGroup"));
+		super (Setter.
+				withGroupKey(HystrixCommandGroupKey.Factory.asKey(CommandConstants.COMMAND_GROUP_KEY)).
+				andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(CommandConstants.THREAD_POOL_KEY)).
+				andThreadPoolPropertiesDefaults(
+						HystrixThreadPoolProperties.Setter().
+							withCoreSize(CommandConstants.THREAD_POOL_CORE_SIZE)));
         this.userid = userid;
 	}
 	
 	@Override
 	protected CustomerSession run() throws Exception {
-		RestClient client = (RestClient) ClientFactory.getNamedClient("acmeair-auth-service-client");
-
-		HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.POST).setUri(new URI("/acmeair-auth-service-0.1.0-SNAPSHOT/rest/api/authtoken/byuserid/" + userid)).build();
-		HttpClientResponse response = client.executeWithLoadBalancer(request);
-		
-		String responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
-		log.debug("responseString = " + responseString);
-		ObjectMapper mapper = new ObjectMapper();
-		CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
-		return cs;
+		String responseString = null;
+		try {
+			RestClient client = (RestClient) ClientFactory.getNamedClient(CommandConstants.ACME_AIR_AUTH_SERVICE_NAMED_CLIENT);
+	
+			HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.POST).setUri(new URI(CommandConstants.ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH + "/authtoken/byuserid/" + userid)).build();
+			HttpClientResponse response = client.executeWithLoadBalancer(request);
+			
+			responseString = IOUtils.toString(response.getRawEntity(), Charsets.UTF_8);
+			log.debug("responseString = " + responseString);
+			ObjectMapper mapper = new ObjectMapper();
+			CustomerSession cs = mapper.readValue(responseString, CustomerSession.class);
+			return cs;
+		}
+		catch (Throwable t) {
+			log.error("caught exception", t);
+			log.error("responseString = " + responseString);
+			throw new Exception(t);
+		}
 	}
 	
 	@Override
 	protected CustomerSession getFallback() {
+		log.error("calling CreateTokenCommand fallback");
 		return new CustomerSession();
 	}
 
