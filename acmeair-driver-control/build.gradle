@@ -88,6 +88,38 @@ def sshExec(config, hosts, sshClientClosure, sshExecCmdClosure, timeout =30) {
 	}
 }
 
+def sshSCP(config, instances, sshClientClosure, timeout = 30) {
+	GParsPool.withPool 15, {
+		instances.eachParallel {
+			def host = it
+
+			def client = new SSHClient()
+			client.addHostKeyVerifier(new Verifier())
+			
+			println("sshSCP on $host for user = $config.cloud.user" )
+			client.connect("$host")
+			
+			def keys = client.loadKeys("$config.cloud.keyFile")
+			client.authPublickey("$config.cloud.user", keys)
+
+			try {
+				println("Preparing to perform SCP for IP = $host")
+				sshClientClosure(client)
+				println("Returned from SCP for IP = $host")
+			}
+			catch (Exception e) {
+				println(e.getMessage())
+				println ("Exception thrown from this ip: $host !!!")
+				e.printStackTrace(System.out)
+			}
+			finally {
+				client.disconnect()
+			}
+		}
+	}
+}
+
+
 task ("startJMeterCluster") {
 	doLast {
 		// note - for sshExec to work this way, we need to make the following changes to /etc/sudoers
@@ -256,7 +288,8 @@ task ("collectLogFiles") {
 		cmd = cmd + "sudo mkdir /opt/acmeair-logs/\$LOG_HOST_IP/nmon;"
 		cmd = cmd + "sudo cp /opt/nmon/logs/* /opt/acmeair-logs/\$LOG_HOST_IP/nmon/.;"
 		cmd = cmd + "cd /opt/acmeair-logs;"
-		cmd = cmd + "sudo zip -r \$LOG_HOST_IP-logs.zip \$LOG_HOST_IP/*"
+		cmd = cmd + "sudo zip -r logs.zip \$LOG_HOST_IP/*;"
+		cmd = cmd + "sudo chmod 644 logs.zip"
 		println("cmd = $cmd")
 		sshExec(
 			config,
@@ -264,5 +297,33 @@ task ("collectLogFiles") {
 			{client -> },
 			{privateIp -> cmd },300
 		)
+	}
+}
+
+import java.util.concurrent.atomic.AtomicInteger
+def counter = new AtomicInteger()
+
+task ("downloadLogFiles") {
+	doLast {
+		def instances = getAllPublicIpsForInstances(config);
+		def logsAndReportsDir = new File("logsAndReports")
+		logsAndReportsDir.mkdirs();
+        if (logsAndReportsDir.isDirectory()) {           
+            ant.delete(dir:logsAndReportsDir.getPath() + "/archivedlogs")
+            ant.delete(dir:logsAndReportsDir.getPath() + "/logs")
+            new File(logsAndReportsDir.getPath() + "/archivedlogs").mkdir()
+            new File(logsAndReportsDir.getPath() + "/logs").mkdir()
+        }		
+		counter.getAndSet(0)
+		
+		sshSCP(config,
+				instances,
+				{client -> client.newSCPFileTransfer().download("/opt/acmeair-logs/logs.zip",logsAndReportsDir.getPath() + "/archivedlogs/"+counter.incrementAndGet().toString() +".zip");}, 60)
+				ant.unzip(dest: logsAndReportsDir.getPath() + '/logs/') {
+					fileset(dir: logsAndReportsDir.getPath() + '/archivedlogs') {
+						include(name: '**.zip')
+				}
+		}
+		
 	}
 }
