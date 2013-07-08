@@ -50,9 +50,6 @@ subprojects {
         compile 'com.netflix.governator:governator:1.0.3'
         compile 'com.netflix.karyon:karyon-core:1.0.2'
         compile 'com.netflix.karyon:karyon-admin-web:1.0.2'
-
-        runtime 'org.slf4j:slf4j-log4j12:1.6.1'
-        runtime 'org.apache.maven.plugins:maven-antrun-plugin:1.6'
     }
 }	
 
@@ -92,7 +89,6 @@ project(':acmeair-webapp') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-wxs')
-		compile project(':acmeair-loader')
 		compile 'commons-io:commons-io:2.4'
 		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 		runtime 'org.springframework:spring-context:3.1.2.RELEASE'
@@ -101,11 +97,22 @@ project(':acmeair-webapp') {
 		runtime 'org.aspectj:aspectjrt:1.6.8'
 		runtime 'org.aspectj:aspectjweaver:1.6.8'
 		runtime 'com.sun.jersey:jersey-json:1.17.1'
+		runtime 'commons-logging:commons-logging:1.1.1'
 		providedRuntime 'jetty:jetty:6.0.2'
-        providedRuntime 'jetty:servlet-api:2.5-6.0.2'
         providedRuntime 'jetty:jetty-util:6.0.2'
         providedRuntime 'jetty:jsp:2.1-6.0.2'
         providedRuntime 'jetty:jsp-api:2.1-6.0.2'
+        
+        // NOTE: I'm changing the AMI's to have the following three jars in their lib directory
+        // I'm doing this to reduce the size of the code that needs to be updated on the AMI for
+        // this war and the auth-service war.  If you get change the versions of these dependencies
+        // make sure you change the AMI's
+		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.1'
+		providedRuntime 'com.amazonaws:aws-java-sdk:1.3.27@jar'
+		providedRuntime 'com.google.guava:guava:11.0.2@jar'
+		
+		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
+		providedRuntime 'jetty:servlet-api:2.5-6.0.2'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 	}
 }
@@ -124,11 +131,18 @@ project(':acmeair-auth-service') {
 		runtime 'org.aspectj:aspectjrt:1.6.8'
 		runtime 'org.aspectj:aspectjweaver:1.6.8'
 		runtime 'com.sun.jersey:jersey-json:1.17.1'
+		runtime 'commons-logging:commons-logging:1.1.1'
 		providedRuntime 'jetty:jetty:6.0.2'
-        providedRuntime 'jetty:servlet-api:2.5-6.0.2'
         providedRuntime 'jetty:jetty-util:6.0.2'
         providedRuntime 'jetty:jsp:2.1-6.0.2'
         providedRuntime 'jetty:jsp-api:2.1-6.0.2'
+        
+		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.1'
+		providedRuntime 'com.amazonaws:aws-java-sdk:1.3.27@jar'
+		providedRuntime 'com.google.guava:guava:11.0.2@jar'
+		
+		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
+		providedRuntime 'jetty:servlet-api:2.5-6.0.2'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 	}
 }
