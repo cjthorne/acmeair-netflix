@@ -25,7 +25,7 @@
 		or session -->
 	<bean id="sessionManager" class="com.acmeair.wxs.utils.WXSSessionManager">
 		<property name="gridName" value="AcmeGrid" />
-		<property name="gridConnectString" value="ACMEAIR_WXS_SERVER:2809" />
+		<property name="gridConnectString" value="eureka.flyacmeair.org:2809" />
 		<!--property name = "integrateWithWASTransactions" value= "true" / -->
 		<property name="disableNearCacheNameString"	value="Flight,FlightSegment,AirportCodeMapping,CustomerSession,Booking,Customer" />
 		<property name="partitionFieldNameString" value="Flight:pk.flightSegmentId,FlightSegment:originPort,Booking:pk.customerId" />
