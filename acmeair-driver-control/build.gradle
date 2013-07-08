@@ -183,6 +183,15 @@ def instanceListToString(instances, returnPublic) {
 	return retStr + "]"
 }
 
+def getAllPublicIpsForInstances(config) {
+	def instances = [];
+	instances.addAll(config.cloud.hard_coded_publicip_list_cluster_driver)
+	instances.addAll(config.cloud.hard_coded_publicip_list_cluster_webapp)
+	instances.addAll(config.cloud.hard_coded_publicip_list_cluster_auth_service)
+	instances.addAll(config.cloud.hard_coded_publicip_list_cluster_wxs_container)
+	return instances;
+}
+
 task ("getCurrentAcmeAirConfigFromAsgard") {
 	doLast {
 		if (!project.hasProperty('asgardHostPort') || !project.hasProperty('asgardUser') || !project.hasProperty('asgardPass')) {
@@ -200,5 +209,60 @@ task ("getCurrentAcmeAirConfigFromAsgard") {
 		def wxsContainerList = getClusterInfo('wxs_container');
 		println('hard_coded_privateip_list_cluster_wxs_container = ' + instanceListToString(wxsContainerList, false));
 		println('hard_coded_publicip_list_cluster_wxs_container = ' + instanceListToString(wxsContainerList, true));
+	}
+}
+
+task ("startNMonOnAllInstances") {
+	def instances = getAllPublicIpsForInstances(config);
+	doLast {
+		def cmd = "";
+		cmd = "cd /opt/nmon;"
+		cmd = cmd + "sudo rm logs/output.nmon;"
+		cmd = cmd + "sudo ./nmon -F logs/output.nmon -s 5 -c 1200 -p;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			instances,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("killNMonOnAllInstances") {
+	def instances = getAllPublicIpsForInstances(config);
+	doLast {
+		def cmd = "";
+		cmd = "sudo killall -9 nmon;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			instances,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("collectLogFiles") {
+	def instances = getAllPublicIpsForInstances(config);
+	doLast {
+		def cmd = "";
+		cmd = cmd + "sudo rm -rf /opt/acmeair-logs;"
+		cmd = cmd + "export LOG_HOST_IP=`hostname -I | sed 's/ *\$//g'`;"
+		cmd = cmd + "sudo mkdir -p /opt/acmeair-logs/\$LOG_HOST_IP;"
+		cmd = cmd + "sudo mkdir /opt/acmeair-logs/\$LOG_HOST_IP/jmeter;"
+		cmd = cmd + "sudo cp /opt/acmeair-netflix/acmeair-driver/src/main/scripts/*1.* /opt/acmeair-logs/\$LOG_HOST_IP/jmeter/.;"
+		cmd = cmd + "sudo mkdir /opt/acmeair-logs/\$LOG_HOST_IP/nmon;"
+		cmd = cmd + "sudo cp /opt/nmon/logs/* /opt/acmeair-logs/\$LOG_HOST_IP/nmon/.;"
+		cmd = cmd + "cd /opt/acmeair-logs;"
+		cmd = cmd + "sudo zip -r \$LOG_HOST_IP-logs.zip \$LOG_HOST_IP/*"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			instances,
+			{client -> },
+			{privateIp -> cmd },300
+		)
 	}
 }
