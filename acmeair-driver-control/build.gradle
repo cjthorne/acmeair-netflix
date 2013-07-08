@@ -130,6 +130,7 @@ task ("startJMeterCluster") {
 		def cmd = "";
 		cmd = "cd /opt/acmeair-netflix/acmeair-driver/src/main/scripts;"
 		cmd = cmd + "sudo killall -9 java;"
+		cmd = cmd + "sudo rm *1.*;"
 		cmd = cmd + "sudo pwd;"
 		cmd = cmd + "sudo chmod +x runjmeter.sh;"
 		cmd = cmd + "sudo ./runjmeter.sh;"
@@ -209,7 +210,7 @@ def instanceListToString(instances, returnPublic) {
 		def ipAddress = returnPublic ? instances[ii].publicIpAddress : instances[ii].privateIpAddress
 		retStr = retStr + "'" + ipAddress + "'"
 		if (ii != instances.size() - 1) {
-			retStr = retString + ", "
+			retStr = retStr + ", "
 		}
 	}
 	return retStr + "]"
@@ -325,5 +326,44 @@ task ("downloadLogFiles") {
 				}
 		}
 		
+	}
+}
+
+task ("organizeLogFilesByComponent") {
+	doLast {
+		def orgLogsDir = "logsAndReports/logs"
+		def newLogsDir = "logsAndReports/organizedLogs"
+		config.cloud.hard_coded_privateip_list_cluster_driver.each {
+			def fromDir = "$orgLogsDir/$it"
+			def intoDir = "$newLogsDir/jmeters/$it"
+			copy {
+				from fromDir
+				into intoDir
+			}
+		}
+		config.cloud.hard_coded_privateip_list_cluster_webapp.each {
+			def fromDir = "$orgLogsDir/$it"
+			def intoDir = "$newLogsDir/wlps/$it"
+			copy {
+				from fromDir
+				into intoDir
+			}
+		}
+		config.cloud.hard_coded_privateip_list_cluster_auth_service.each {
+			def fromDir = "$orgLogsDir/$it"
+			def intoDir = "$newLogsDir/wlps/$it"
+			copy {
+				from fromDir
+				into intoDir
+			}
+		}
+		config.cloud.hard_coded_privateip_list_cluster_wxs_container.each {
+			def fromDir = "$orgLogsDir/$it"
+			def intoDir = "$newLogsDir/containers/$it"
+			copy {
+				from fromDir
+				into intoDir
+			}
+		}
 	}
 }
