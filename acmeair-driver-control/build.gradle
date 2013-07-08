@@ -45,19 +45,9 @@ import static groovyx.net.http.ContentType.URLENC
 def config = new ConfigSlurper().parse(new File('cloud.groovy').toURL())
 
 class Instance {
-	String name
+	String instanceId
 	String publicIpAddress
-}
-
-task cloud {
-	description = "creates cloud config"
-	doLast {
-		def ips = config.cloud.hardCodedJMeterInstanceList
-		cloud.instances = []
-		ips.each {
-			cloud.instances.add(new Instance(publicIpAddress:"$it"))
-		}				
-	}
+	String privateIpAddress
 }
 
 class Verifier implements HostKeyVerifier {
@@ -68,11 +58,10 @@ class Verifier implements HostKeyVerifier {
 	}
 }
 
-def sshExec(config, instances, sshClientClosure, sshExecCmdClosure, timeout =30) {
-	if (instances.size() < 1) throw Exception("No cloud instances found for your scale system.")
+def sshExec(config, hosts, sshClientClosure, sshExecCmdClosure, timeout =30) {
 	GParsPool.withPool 15, {
-		instances.eachParallel {
-			def host = it.getPublicIpAddress()
+		hosts.eachParallel {
+			def host = it
 
 			def client = new SSHClient()
 			client.addHostKeyVerifier(new Verifier())
@@ -99,7 +88,7 @@ def sshExec(config, instances, sshClientClosure, sshExecCmdClosure, timeout =30)
 	}
 }
 
-task ("startJMeterCluster", dependsOn : [cloud]) {
+task ("startJMeterCluster") {
 	doLast {
 		// note - for sshExec to work this way, we need to make the following changes to /etc/sudoers
 		// the first allows the ssh to sudo without a tty.  the second allows ec2-user to sudo any command
@@ -115,17 +104,17 @@ task ("startJMeterCluster", dependsOn : [cloud]) {
 		println("cmd = $cmd")
 		sshExec(
 			config,
-			cloud.instances,
+			config.cloud.hard_coded_publicip_list_cluster_driver,
 			{client -> },
 			{privateIp -> cmd },300
 		)
 	}
 }
 
-task ("updateJMeterHosts", dependsOn : [cloud]) {
+task ("updateJMeterHosts") {
 	doLast {
 		new File('hosts.csv.updated').withWriter {
-			out -> config.cloud.elbOrDirectToAppServerInstanceListForJMeterHosts.each {
+			out -> config.cloud.hard_coded_privateip_list_cluster_webapp.each {
       			out.println it
       		}
     	}
@@ -134,21 +123,21 @@ task ("updateJMeterHosts", dependsOn : [cloud]) {
 		cmd = "sudo cp -v ~ec2-user/hosts.csv.updated /opt/acmeair-netflix/acmeair-driver/src/main/scripts/hosts.csv;"
     	sshExec(
     		config,
-			cloud.instances,
+			config.cloud.hard_coded_publicip_list_cluster_driver,
 			{client -> client.newSCPFileTransfer().upload(new FileSystemFile("hosts.csv.updated"), 'hosts.csv.updated');},
 			{privateIp -> cmd}, 10
 		)
 	}
 }
 
-task ("killJMeterCluster", dependsOn : [cloud]) {
+task ("killJMeterCluster") {
 	doLast {
 		def cmd = "";
 		cmd = cmd + "sudo killall -9 java;"
 		println("cmd = $cmd")
 		sshExec(
 			config,
-			cloud.instances,
+			config.cloud.hard_coded_publicip_list_cluster_driver,
 			{client -> },
 			{privateIp -> cmd },300
 		)
@@ -156,7 +145,7 @@ task ("killJMeterCluster", dependsOn : [cloud]) {
 }
 
 def getClusterInfo(clusterName, skipUnderscore = false) {
-		def clusterList = new ArrayList()
+		def clusterList = [];
 		def rest = new RESTClient('http://' + asgardHostPort + '/')
 		rest.auth.basic asgardUser, asgardPass
 		try {
@@ -167,7 +156,11 @@ def getClusterInfo(clusterName, skipUnderscore = false) {
 					def instanceUrl = 'us-east-1/instance/show/' + (clusterData.instances[0])[ii].instanceId + '.json'
 					rest.get(path : instanceUrl) { resp2, instanceData ->
 						//println(instanceData)
-						clusterList.add(instanceData.instance.privateIpAddress)
+						def instance = new Instance(
+							instanceId : instanceData.instance.instanceId,
+							publicIpAddress : instanceData.instance.publicIpAddress,
+							privateIpAddress : instanceData.instance.privateIpAddress)
+						clusterList.add(instance)
 					}
 				}
 			}
@@ -178,18 +171,34 @@ def getClusterInfo(clusterName, skipUnderscore = false) {
 		}
 }
 
+def instanceListToString(instances, returnPublic) {
+	def retStr = "["
+	for (int ii = 0; ii < instances.size(); ii++) {
+		def ipAddress = returnPublic ? instances[ii].publicIpAddress : instances[ii].privateIpAddress
+		retStr = retStr + "'" + ipAddress + "'"
+		if (ii != instances.size() - 1) {
+			retStr = retString + ", "
+		}
+	}
+	return retStr + "]"
+}
+
 task ("getCurrentAcmeAirConfigFromAsgard") {
 	doLast {
 		if (!project.hasProperty('asgardHostPort') || !project.hasProperty('asgardUser') || !project.hasProperty('asgardPass')) {
 			throw new GradleException("usage:  gradlew getCurrentAcmeAirConfigFromAsgard -PasgardHostPort=1.1.1.1:8080 -PasgardUser=username -PasgardPass=password");
 		}
 		def driverList = getClusterInfo('driver');
-		println('hard_coded_list_cluster_driver = ' + driverList);
+		println('hard_coded_privateip_list_cluster_driver = ' + instanceListToString(driverList, false));
+		println('hard_coded_publicip_list_cluster_driver = ' + instanceListToString(driverList, true));
 		def webAppList = getClusterInfo('webapp', true);
-		println('hard_coded_list_cluster_webapp = ' + webAppList);
+		println('hard_coded_privateip_list_cluster_webapp = ' + instanceListToString(webAppList, false));
+		println('hard_coded_publicip_list_cluster_webapp = ' + instanceListToString(webAppList, true));
 		def authServiceList = getClusterInfo('auth_service');
-		println('hard_coded_list_cluster_auth_service = ' + authServiceList);
+		println('hard_coded_privateip_list_cluster_auth_service = ' + instanceListToString(authServiceList, false));
+		println('hard_coded_publicip_list_cluster_auth_service = ' + instanceListToString(authServiceList, true));
 		def wxsContainerList = getClusterInfo('wxs_container');
-		println('hard_coded_list_cluster_wxs_container = ' + wxsContainerList);
+		println('hard_coded_privateip_list_cluster_wxs_container = ' + instanceListToString(wxsContainerList, false));
+		println('hard_coded_publicip_list_cluster_wxs_container = ' + instanceListToString(wxsContainerList, true));
 	}
 }
