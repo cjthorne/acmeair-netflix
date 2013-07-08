@@ -18,7 +18,6 @@ package com.acmeair.web.hystrixcommands;
 import java.net.URI;
 
 import com.netflix.hystrix.*;
-import com.netflix.hystrix.HystrixCommand.Setter;
 import com.netflix.niws.client.http.HttpClientRequest;
 import com.netflix.niws.client.http.HttpClientRequest.Verb;
 import com.netflix.niws.client.http.HttpClientResponse;
