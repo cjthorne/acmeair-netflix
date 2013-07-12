@@ -177,6 +177,95 @@ task ("killJMeterCluster") {
 	}
 }
 
+task ("killWXSContainerCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "sudo killall -9 java;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_wxs_container,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("stopAuthServiceCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "cd /opt/apache-tomcat-7.0.37/;";
+		cmd = cmd + "sudo bin/shutdown.sh;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_auth_service,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+// TODO: Not working yet
+task ("startAuthServiceCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "cd /opt/apache-tomcat-7.0.37/;";
+		cmd = cmd + "sudo bin/startup.sh &;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_auth_service,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("stopWebAppCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "cd /opt/apache-tomcat-7.0.37/;";
+		cmd = cmd + "sudo bin/shutdown.sh;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_webapp,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+// TODO: Not working yet
+task ("startWebAppCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "/etc/rc.d/init.d/tomcatd start;";
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_auth_service,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
+task ("startWXSContainerCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "sudo /etc/rc.d/init.d/wxscontainer start;"
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_wxs_container,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
 def getClusterInfo(clusterName, skipUnderscore = false) {
 		def clusterList = [];
 		def rest = new RESTClient('http://' + asgardHostPort + '/')
@@ -288,6 +377,8 @@ task ("collectLogFiles") {
 		cmd = cmd + "sudo cp /opt/acmeair-netflix/acmeair-driver/src/main/scripts/*1.* /opt/acmeair-logs/\$LOG_HOST_IP/jmeter/.;"
 		cmd = cmd + "sudo mkdir /opt/acmeair-logs/\$LOG_HOST_IP/nmon;"
 		cmd = cmd + "sudo cp /opt/nmon/logs/* /opt/acmeair-logs/\$LOG_HOST_IP/nmon/.;"
+		cmd = cmd + "sudo mkdir /opt/acmeair-logs/\$LOG_HOST_IP/tomcat;"
+		cmd = cmd + "sudo cp /opt/apache-tomcat-7.0.37/logs/* /opt/acmeair-logs/\$LOG_HOST_IP/tomcat/.;"
 		cmd = cmd + "cd /opt/acmeair-logs;"
 		cmd = cmd + "sudo zip -r logs.zip \$LOG_HOST_IP/*;"
 		cmd = cmd + "sudo chmod 644 logs.zip"
