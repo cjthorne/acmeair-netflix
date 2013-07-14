@@ -191,6 +191,21 @@ task ("killWXSContainerCluster") {
 	}
 }
 
+task ("updateWXSContainerCluster") {
+	doLast {
+		def cmd = "";
+		cmd = cmd + "cd /opt/ObjectGrid/acmeair-netflixtech/server/config;"
+		cmd = cmd + 'sudo sed -i s/\"13\"/\"83\"/g deployment.xml;'
+		println("cmd = $cmd")
+		sshExec(
+			config,
+			config.cloud.hard_coded_publicip_list_cluster_wxs_container,
+			{client -> },
+			{privateIp -> cmd },300
+		)
+	}
+}
+
 task ("stopAuthServiceCluster") {
 	doLast {
 		def cmd = "";
@@ -255,7 +270,7 @@ task ("startWebAppCluster") {
 task ("startWXSContainerCluster") {
 	doLast {
 		def cmd = "";
-		cmd = cmd + "sudo /etc/rc.d/init.d/wxscontainer start;"
+		cmd = cmd + "sudo nohup service wxscontainer start;"
 		println("cmd = $cmd")
 		sshExec(
 			config,
