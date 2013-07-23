@@ -15,6 +15,8 @@
 *******************************************************************************/
 package com.acmeair.web.hystrixcommands;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 
 import com.netflix.hystrix.*;
@@ -71,7 +73,18 @@ public class CreateTokenCommand extends HystrixCommand<CustomerSession> {
 	
 	@Override
 	protected CustomerSession getFallback() {
+		// TODO: Eventually we need to make this debug vs. error if fallback is expected to be called
 		log.error("calling CreateTokenCommand fallback");
+		log.error(getExecutionEvents());
+		try {
+			throw new Exception();
+		}
+		catch (Exception e) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			log.error(sw.toString());
+		}
 		return new CustomerSession();
 	}
 

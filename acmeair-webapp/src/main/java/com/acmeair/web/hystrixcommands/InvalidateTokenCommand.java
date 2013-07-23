@@ -15,6 +15,8 @@
 *******************************************************************************/
 package com.acmeair.web.hystrixcommands;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
@@ -68,7 +70,18 @@ public class InvalidateTokenCommand extends HystrixCommand<Void> {
 	
 	@Override
 	protected Void getFallback() {
+		// TODO: Eventually we need to make this debug vs. error if fallback is expected to be called
 		log.error("calling InvalidateTokenCommand fallback");
+		log.error(getExecutionEvents());
+		try {
+			throw new Exception();
+		}
+		catch (Exception e) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			log.error(sw.toString());
+		}
 		return null;
 	}
 }
