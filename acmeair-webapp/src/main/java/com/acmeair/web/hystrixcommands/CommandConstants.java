@@ -20,5 +20,5 @@ public class CommandConstants {
 	public static final String COMMAND_GROUP_KEY = "AcmeAirGroup";
 	public static final String THREAD_POOL_KEY = "AcmeAirPool";
 	public static final String ACME_AIR_AUTH_SERVICE_NAMED_CLIENT = "acmeair-auth-service-client";
-	public static final String ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH = "/acmeair-auth-service-0.1.0-SNAPSHOT/rest/api";
+	public static final String ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH = "/rest/api";
 }

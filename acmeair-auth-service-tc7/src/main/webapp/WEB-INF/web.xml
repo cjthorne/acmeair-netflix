@@ -6,11 +6,6 @@
 	<display-name>acmeair-auth-service</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.htm</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
-		<welcome-file>default.html</welcome-file>
-		<welcome-file>default.htm</welcome-file>
-		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
 	<!-- Configure ContextLoaderListener to use AnnotationConfigWebApplicationContext 
@@ -27,7 +22,7 @@
 		be specified for component-scanning -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>com.acmeair.services.authService.WXSFlatAppConfig</param-value>
+		<param-value>com.acmeair.services.authService.WXSDirectAppConfig</param-value>
 	</context-param>
 
 	<!-- Bootstrap the root application context as usual using ContextLoaderListener -->
@@ -35,10 +30,6 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<listener>
-		<listener-class>com.acmeair.services.KaryonListener</listener-class>
-	</listener>
-		
 	<servlet>
   		<servlet-name>jersey-servlet</servlet-name>
   		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -57,5 +48,19 @@
 		<servlet-name>jersey-servlet</servlet-name>
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
+	
+    <listener>
+        <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
+    </listener>
+    
+    <filter>
+        <filter-name>guiceFilter</filter-name>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>guiceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>	
 
 </web-app>
