@@ -108,10 +108,11 @@ project(':acmeair-webapp-wlp') {
 		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.2'
 		// skip these as we'll include it in the war patched
 		providedRuntime 'com.netflix.governator:governator:1.1.1@jar'
-		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
+		// providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar' // enable this to work in SoftLayer changes
 	}
 	
-	FileTree cpTree = fileTree('patchGovernator/patched') + fileTree('patchEureka/patched')
+	// FileTree cpTree = fileTree('patchGovernator/patched') + fileTree('patchEureka/patched') // enable this to work in SoftLayer changes
+	FileTree cpTree = fileTree('patchGovernator/patched')
 	war {
 		from '../acmeair-webapp/src/main/webapp'
 		classpath {
@@ -185,10 +186,11 @@ project(':acmeair-auth-service-wlp') {
 		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.2'
 		// skip these as we'll include it in the war patched
 		providedRuntime 'com.netflix.governator:governator:1.1.1@jar'
-		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
+		// providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar' // enable this to work in SoftLayer changes
 	}
 	
-	FileTree cpTree = fileTree('../acmeair-webapp-wlp/patchGovernator/patched') + fileTree('../acmeair-webapp-wlp/patchEureka/patched')
+	// FileTree cpTree = fileTree('../acmeair-webapp-wlp/patchGovernator/patched') + fileTree('../acmeair-webapp-wlp/patchEureka/patched') // enable this to work in SoftLayer changes
+	FileTree cpTree = fileTree('../acmeair-webapp-wlp/patchGovernator/patched')
 	war {
 		from '../acmeair-auth-service/src/main/webapp'
 		classpath {
