@@ -106,13 +106,17 @@ project(':acmeair-webapp-wlp') {
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
         // Using the 8.5.5.5 WLP + WXS Feature and 8.6.0.2 WXS means this is provided by runtime
 		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.2'
-		// skip this as we'll include it in the war patched
+		// skip these as we'll include it in the war patched
 		providedRuntime 'com.netflix.governator:governator:1.1.1@jar'
+		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
 	}
 	
+	FileTree cpTree = fileTree('patchGovernator/patched') + fileTree('patchEureka/patched')
 	war {
 		from '../acmeair-webapp/src/main/webapp'
-		classpath fileTree('patchGovernator/patched')
+		classpath {
+			cpTree
+		}
 	}
 }
 
@@ -179,13 +183,17 @@ project(':acmeair-auth-service-wlp') {
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
         // Using the 8.5.5.5 WLP + WXS Feature and 8.6.0.2 WXS means this is provided by runtime
 		providedRuntime 'com.ibm.websphere.objectgrid:objectgrid:8.6.0.2'
-		// skip this as we'll include it in the war patched
+		// skip these as we'll include it in the war patched
 		providedRuntime 'com.netflix.governator:governator:1.1.1@jar'
+		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
 	}
 	
+	FileTree cpTree = fileTree('../acmeair-webapp-wlp/patchGovernator/patched') + fileTree('../acmeair-webapp-wlp/patchEureka/patched')
 	war {
 		from '../acmeair-auth-service/src/main/webapp'
-		classpath fileTree('../acmeair-webapp-wlp/patchGovernator/patched')
+		classpath {
+			cpTree
+		}
 	}
 }
 
@@ -269,3 +277,28 @@ task patchGovernator {
 		ant.zip(destfile : "$patchedJar", basedir : 'acmeair-webapp-wlp/patchGovernator/governator-1.1.1.jar.expand')
 	}
 }
+
+task patchEureka {
+	doLast {
+		def patchedJar = 'acmeair-webapp-wlp/patchEureka/patched/eureka-1.1.73.jar'
+		println("patching eureka jar ($origEurFile) to jar ($patchedJar)")
+		new File('acmeair-webapp-wlp/patchEureka').mkdir()
+		new File('acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.expand').mkdir()
+		new File('acmeair-webapp-wlp/patchEureka/patched').mkdir()
+		// would be nice to find a way to get this from maven instead of passing in as arg
+		// /Users/xx/.gradle/caches/artifacts-24/filestore/com.netflix.eureka/eureka-client/1.1.73/jar/8b88907d2f6f5a9d97a69092977a4fcde5f66b63/eureka-client-1.1.73.jar
+		ant.copy(file : "$origEurFile", tofile : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.org', overwrite:"true")
+		ant.unzip(src : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.org', dest : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.expand')
+		ant.copy(todir : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.expand/com/netflix/discovery', overwrite:"true") {
+			fileset(dir : 'acmeair-webapp-wlp/patchEureka/com/netflix/discovery') {
+				include(name : 'DiscoveryClient*.class')
+			}
+			fileset(dir : 'acmeair-webapp-wlp/patchEureka/com/netflix/appinfo') {
+				include(name : 'AbstractInstanceConfig*.class')
+			}
+		} 
+		ant.copy(file : 'acmeair-webapp-wlp/patchEureka/com/netflix/discovery/DiscoveryClient.java', todir : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.expand/com/netflix/discovery', overwrite:"true")
+		ant.zip(destfile : "$patchedJar", basedir : 'acmeair-webapp-wlp/patchEureka/eureka-1.1.73.jar.expand')
+	}
+}
+
