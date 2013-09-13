@@ -34,7 +34,7 @@ Source:
 
 ## How to get started
 
-* See the [wiki](https://github.com/aspyker/acmeair-netflixoss/wiki)
+* See the [wiki](https://github.com/aspyker/acmeair-netflix/wiki)
 
 
 ## Ask Questions
