@@ -13,14 +13,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.acmeair.wxs.service;
+package com.acmeair.mock.service;
 
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.Customer;
@@ -30,21 +29,11 @@ import com.acmeair.entities.CustomerAddress;
 import com.acmeair.entities.CustomerSession;
 import com.acmeair.service.CustomerService;
 import com.acmeair.service.KeyGenerator;
-import com.acmeair.wxs.utils.WXSSessionManager;
-import com.ibm.websphere.objectgrid.ObjectMap;
-import com.ibm.websphere.objectgrid.Session;
 
 @Service("customerService")
 public class CustomerServiceImpl implements CustomerService{
 	
-	private static final String CUSTOMER_MAP_NAME="Customer";
-	private static final String CUSTOMER_SESSION_MAP_NAME="CustomerSession";
-	
 	private static final int DAYS_TO_ALLOW_SESSION = 1;
-	
-	@Autowired
-	private WXSSessionManager sessionManager;
-
 	
 	@Resource
 	KeyGenerator keyGenerator;
@@ -56,9 +45,6 @@ public class CustomerServiceImpl implements CustomerService{
 			CustomerAddress address) {
 		try{
 			Customer customer = new Customer(username, password, status, total_miles, miles_ytd, address, phoneNumber, phoneNumberType);
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerMap = session.getMap(CUSTOMER_MAP_NAME);
-			customerMap.insert(customer.getUsername(), customer);
 			return customer;
 		}catch (Exception e)
 		{
@@ -69,9 +55,6 @@ public class CustomerServiceImpl implements CustomerService{
 	@Override
 	public Customer updateCustomer(Customer customer) {
 		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerMap = session.getMap(CUSTOMER_MAP_NAME);
-			customerMap.update(customer.getUsername(), customer);
 			return customer;
 		}catch (Exception e)
 		{
@@ -81,11 +64,9 @@ public class CustomerServiceImpl implements CustomerService{
 
 	private Customer getCustomer(String username) {
 		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerMap = session.getMap(CUSTOMER_MAP_NAME);
-			
-			Customer c = (Customer) customerMap.get(username);
-			return c;
+			CustomerAddress address = new CustomerAddress("123 Main St.", null, "Anytown", "NC", "USA", "27617");
+			Customer customer = new Customer(username, "password", Customer.MemberShipStatus.GOLD, 1000000, 1000, address, "919-123-4567", PhoneType.BUSINESS);
+			return customer;
 		}catch (Exception e)
 		{
 			throw new RuntimeException(e);
@@ -125,10 +106,7 @@ public class CustomerServiceImpl implements CustomerService{
 	@Override
 	public CustomerSession validateSession(String sessionid) {
 		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerSessionMap = session.getMap(CUSTOMER_SESSION_MAP_NAME);
-			
-			CustomerSession cSession = (CustomerSession)customerSessionMap.get(sessionid);
+			CustomerSession cSession = createSession("uid0@email.com");
 			if (cSession == null) {
 				return null;
 			}
@@ -136,7 +114,6 @@ public class CustomerServiceImpl implements CustomerService{
 			Date now = new Date();
 			
 			if (cSession.getTimeoutTime().before(now)) {
-				customerSessionMap.remove(sessionid);
 				return null;
 			}
 			return cSession;
@@ -156,9 +133,6 @@ public class CustomerServiceImpl implements CustomerService{
 			c.add(Calendar.DAY_OF_YEAR, DAYS_TO_ALLOW_SESSION);
 			Date expiration = c.getTime();
 			CustomerSession cSession = new CustomerSession(sessionId, customerId, now, expiration);
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerSessionMap = session.getMap(CUSTOMER_SESSION_MAP_NAME);
-			customerSessionMap.insert(cSession.getId(), cSession);
 			return cSession;
 		}catch (Exception e)
 		{
@@ -168,13 +142,5 @@ public class CustomerServiceImpl implements CustomerService{
 
 	@Override
 	public void invalidateSession(String sessionid) {
-		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap customerSessionMap = session.getMap(CUSTOMER_SESSION_MAP_NAME);
-			customerSessionMap.remove(sessionid);
-		}catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
 	}
 }

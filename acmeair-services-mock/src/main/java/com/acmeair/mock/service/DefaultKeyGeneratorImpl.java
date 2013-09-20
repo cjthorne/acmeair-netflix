@@ -13,14 +13,17 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.acmeair.loader;
+package com.acmeair.mock.service;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
+import org.springframework.stereotype.Service;
+import com.acmeair.service.KeyGenerator;
 
-@Configuration
-@ImportResource({"classpath:/spring-config-acmeair-data-wxs-direct-notx.xml"})
-@ComponentScan(basePackages={"com.acmeair.wxs.service", "com.acmeair.loader"})
-public class WXSDirectAppConfig {
+
+@Service("keyGenerator")
+public class DefaultKeyGeneratorImpl implements KeyGenerator {
+
+	@Override
+	public Object generate() {
+		return java.util.UUID.randomUUID().toString();
+	}
 }

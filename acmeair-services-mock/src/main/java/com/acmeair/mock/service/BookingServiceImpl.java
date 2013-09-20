@@ -13,18 +13,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.acmeair.wxs.service;
+package com.acmeair.mock.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.Booking;
@@ -36,21 +34,12 @@ import com.acmeair.service.BookingService;
 import com.acmeair.service.CustomerService;
 import com.acmeair.service.FlightService;
 import com.acmeair.service.KeyGenerator;
-import com.acmeair.wxs.utils.WXSSessionManager;
-import com.ibm.websphere.objectgrid.ObjectMap;
-import com.ibm.websphere.objectgrid.Session;
-import com.ibm.websphere.objectgrid.query.ObjectQuery;
 
 @Service("bookingService")
 public class BookingServiceImpl implements BookingService  {
 	
-	private static final String BOOKING_MAP_NAME="Booking";
-	
 	//private static final Log log = LogFactory.getLog(BookingServiceImpl.class);
 	
-	@Autowired
-	private WXSSessionManager sessionManager;
-
 	@Resource
 	FlightService flightService;
 
@@ -70,9 +59,6 @@ public class BookingServiceImpl implements BookingService  {
 			Booking newBooking = new Booking(keyGenerator.generate().toString(), new Date(), c, f);
 			BookingPK key = newBooking.getPkey();
 			
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap bookingMap = session.getMap(BOOKING_MAP_NAME);
-			bookingMap.put(key, newBooking);
 			return key;
 		}catch (Exception e)
 		{
@@ -84,10 +70,9 @@ public class BookingServiceImpl implements BookingService  {
 	public Booking getBooking(String user, String id) {
 		
 		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap bookingMap = session.getMap(BOOKING_MAP_NAME);
+			Booking booking = new Booking(keyGenerator.generate().toString(), new Date(), null, null);
 			
-			return (Booking)bookingMap.get(new BookingPK(user, id));
+			return booking;
 		}catch (Exception e)
 		{
 			throw new RuntimeException(e);
@@ -97,43 +82,15 @@ public class BookingServiceImpl implements BookingService  {
 
 	@Override
 	public void cancelBooking(String user, String id) {
-		try{
-			Session session = sessionManager.getObjectGridSession();
-			ObjectMap bookingMap = session.getMap(BOOKING_MAP_NAME);
-			
-			bookingMap.remove(new BookingPK(user, id));
-		}catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
 	}	
 	
 	@Override
 	public List<Booking> getBookingsByUser(String user) {
 		try{
-			Session session = sessionManager.getObjectGridSession();
-	
-			boolean startedTran = false;
-			if (!session.isTransactionActive()) 
-			{
-				startedTran = true;
-				session.begin();
-			}
-			ObjectQuery query = session.createObjectQuery("select obj from Booking obj where obj.customerId=?1");
-			query.setParameter(1, user);
-		
-			int partitionId = sessionManager.getBackingMap(BOOKING_MAP_NAME).getPartitionManager().getPartition(user);
-			query.setPartition(partitionId);
-			
-			List<Booking> list = new ArrayList<Booking>();
-			@SuppressWarnings("unchecked")
-			Iterator<Object> itr = query.getResultIterator();
-			while(itr.hasNext())
-				list.add((Booking)itr.next());
-			if (startedTran)
-				session.commit();
-			
-			return list;
+			Booking booking  = getBooking(user, null);
+			List<Booking> bookings = new ArrayList<Booking>();
+			bookings.add(booking);
+			return bookings;
 		}catch (Exception e)
 		{
 			throw new RuntimeException(e);

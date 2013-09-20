@@ -13,17 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.acmeair.wxs.service;
+package com.acmeair.web.config;
 
-import org.springframework.stereotype.Service;
-import com.acmeair.service.KeyGenerator;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-
-@Service("keyGenerator")
-public class DefaultKeyGeneratorImpl implements KeyGenerator {
-
-	@Override
-	public Object generate() {
-		return java.util.UUID.randomUUID().toString();
-	}
+@Configuration
+@ComponentScan(basePackages={"com.acmeair.mock.service"})
+public class MockAppConfig {
 }
