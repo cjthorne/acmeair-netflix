@@ -43,6 +43,13 @@ project(':acmeair-services') {
 	}
 }
 
+project(':acmeair-services-astyanax') {
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+	}
+}
+
 project(':acmeair-webapp') {
 
 	dependencies {

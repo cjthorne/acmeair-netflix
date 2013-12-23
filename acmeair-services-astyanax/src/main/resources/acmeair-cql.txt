@@ -1,0 +1,19 @@
+DROP KEYSPACE acmeair;
+
+CREATE KEYSPACE acmeair 
+  WITH REPLICATION = {'class' : 'SimpleStrategy',
+  'replication_factor': 3};
+
+USE acmeair;
+
+// Address - consider column family after initial prototype
+CREATE TABLE customer (
+  username text PRIMARY KEY,
+  password text,
+  total_miles int,
+  miles_ytd int,
+  // Address - consider column family after initial prototype
+  // address
+  phone_number text,
+  phone_number_type int
+);
