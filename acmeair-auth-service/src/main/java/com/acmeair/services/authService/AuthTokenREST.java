@@ -36,7 +36,7 @@ public class AuthTokenREST {
 	@Context 
 	private HttpServletRequest request;
 //	private TransactionService transactionService = null; 
-	private boolean initializedTXService = false;
+//	private boolean initializedTXService = false;
 	
 //	private TransactionService getTxService() {
 //		if (!this.initializedTXService) {

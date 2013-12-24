@@ -42,7 +42,7 @@ public class RESTCookieSessionFilter implements Filter {
 	private static final String LOGOUT_PATH = "/rest/api/login/logout";
 	
 //	private TransactionService transactionService = null; 
-	private boolean initializedTXService = false;
+//	private boolean initializedTXService = false;
 	
 	@Override
 	public void destroy() {
