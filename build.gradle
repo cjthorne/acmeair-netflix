@@ -49,6 +49,9 @@ project(':acmeair-services-astyanax') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
+		compile 'com.netflix.astyanax:astyanax-core:1.56.44'
+		compile 'com.netflix.astyanax:astyanax-thrift:1.56.44'
+		compile 'com.netflix.astyanax:astyanax-cassandra:1.56.44'
 	}
 }
 
@@ -158,6 +161,7 @@ project(':acmeair-loader') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
+		compile project(':acmeair-services-astyanax')
 		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 	}
 }

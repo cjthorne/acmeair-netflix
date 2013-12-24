@@ -1,19 +1,51 @@
 package com.acmeair.service.astyanax;
 
+import org.springframework.stereotype.Service;
+
 import com.acmeair.entities.Customer;
 import com.acmeair.entities.Customer.MemberShipStatus;
 import com.acmeair.entities.Customer.PhoneType;
 import com.acmeair.entities.CustomerAddress;
 import com.acmeair.entities.CustomerSession;
 import com.acmeair.service.CustomerService;
+import com.netflix.astyanax.AstyanaxContext;
+import com.netflix.astyanax.Keyspace;
+import com.netflix.astyanax.MutationBatch;
+import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
+import com.netflix.astyanax.connectionpool.OperationResult;
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl;
+import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor;
+import com.netflix.astyanax.impl.AstyanaxConfigurationImpl;
+import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.serializers.StringSerializer;
+import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 
+@Service("customerService")
 public class CustomerServiceImpl implements CustomerService {
 
+	private static final ColumnFamily<String, String> CF_CUSTOMER = new ColumnFamily<String, String>("customer", StringSerializer.get(), StringSerializer.get());
+	
+	private static Keyspace ks;
+	
 	@Override
 	public Customer createCustomer(String username, String password,
 			MemberShipStatus status, int total_miles, int miles_ytd,
 			String phoneNumber, PhoneType phoneNumberType,
 			CustomerAddress address) {
+		
+		MutationBatch m = getKeyspace().prepareMutationBatch();
+
+		m.withRow(CF_CUSTOMER, username)
+		  .putColumn("password", "password", null);
+
+		try {
+		  OperationResult<Void> result = m.execute();
+		} catch (ConnectionException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("loading up customer ...");
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -59,6 +91,27 @@ public class CustomerServiceImpl implements CustomerService {
 	public void invalidateSession(String sessionid) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private Keyspace getKeyspace() {
+		if (ks == null) {
+			AstyanaxContext<Keyspace> context = new AstyanaxContext.Builder()
+		    .forKeyspace("acmeair")
+		    .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
+		        .setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
+		    )
+		    .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl("MyConnectionPool")
+		        .setPort(9160)
+		        .setMaxConnsPerHost(1)
+		        .setSeeds("127.0.0.1:9160")
+		    )
+		    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
+		    .buildKeyspace(ThriftFamilyFactory.getInstance());
+
+			context.start();
+			ks = context.getClient();
+		}
+		return ks;
 	}
 
 }
