@@ -29,3 +29,10 @@ CREATE TABLE airport_code_mapping (
   airport_code text PRIMARY KEY,
   airport_name text,
 ) WITH COMPACT STORAGE;
+
+CREATE TABLE flight_segment (
+  flight_segment_id text PRIMARY_KEY,
+  origin_port text,
+  dest_port text,
+  miles int
+) WITH COMPACT STORAGE;

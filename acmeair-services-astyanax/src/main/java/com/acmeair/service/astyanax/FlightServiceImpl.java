@@ -20,6 +20,7 @@ import com.netflix.astyanax.serializers.StringSerializer;
 public class FlightServiceImpl implements FlightService {
 
 	private static final ColumnFamily<String, String> CF_AIRPORT_CODE_MAPPING = new ColumnFamily<String, String>("airport_code_mapping", StringSerializer.get(), StringSerializer.get());
+	private static final ColumnFamily<String, String> CF_FLIGHT_SEGMENT = new ColumnFamily<String, String>("flight_segment", StringSerializer.get(), StringSerializer.get());
 
 	@Override
 	public Flight getFlightByFlightKey(FlightPK key) {
@@ -43,11 +44,11 @@ public class FlightServiceImpl implements FlightService {
 	@Override
 	public void storeAirportMapping(AirportCodeMapping mapping) {
 		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
-		
+
 		m.withRow(CF_AIRPORT_CODE_MAPPING, mapping.getAirportCode())
 			.putColumn("airport_code", mapping.getAirportCode(), null)
 			.putColumn("airport_name", mapping.getAirportName(), null);
-		
+
 		try {
 		  m.execute();
 		} catch (Exception e) {
@@ -68,7 +69,20 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public void storeFlightSegment(FlightSegment flightSeg) {
+		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
 
+		m.withRow(CF_FLIGHT_SEGMENT, flightSeg.getFlightName())
+			.putColumn("flight_segment_id", flightSeg.getFlightName(), null)
+			.putColumn("origin_port", flightSeg.getOriginPort(), null)
+			.putColumn("dest_port", flightSeg.getDestPort(), null)
+			.putColumn("miles", flightSeg.getMiles(), null);
+
+		try {
+		  m.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 	}
 
 }
