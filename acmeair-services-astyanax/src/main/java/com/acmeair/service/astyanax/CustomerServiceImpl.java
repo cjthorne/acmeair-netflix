@@ -35,13 +35,14 @@ public class CustomerServiceImpl implements CustomerService {
 			CustomerAddress address) {
 		
 		MutationBatch m = getKeyspace().prepareMutationBatch();
-
+		
 		m.withRow(CF_CUSTOMER, username)
-		  .putColumn("password", "password", null);
-
+			.putColumn("password", password, null);
+		
 		try {
 		  OperationResult<Void> result = m.execute();
-		} catch (ConnectionException e) {
+		  System.out.println(result);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -103,7 +104,7 @@ public class CustomerServiceImpl implements CustomerService {
 		    .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl("MyConnectionPool")
 		        .setPort(9160)
 		        .setMaxConnsPerHost(1)
-		        .setSeeds("127.0.0.1:9160")
+		        .setSeeds("cass1:9160")
 		    )
 		    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
 		    .buildKeyspace(ThriftFamilyFactory.getInstance());
