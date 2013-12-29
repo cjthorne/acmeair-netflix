@@ -10,10 +10,17 @@ USE acmeair;
 CREATE TABLE customer (
   username text PRIMARY KEY,
   password text,
+  customer_status text,
   total_miles int,
   miles_ytd int,
-  // Address - consider column family after initial prototype
-  // address
+  addr_street1 text,
+  addr_street2 text,
+  addr_city text,
+  addr_state_province text,
+  addr_country text,
+  addr_postal_code text,
+// COMPACT STORAGE doesn't work with collection types
+//  phone_numbers map<text, text>
   phone_number text,
-  phone_number_type int
-);
+  phone_number_type text
+) WITH COMPACT STORAGE;

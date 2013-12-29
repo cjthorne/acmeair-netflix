@@ -37,7 +37,19 @@ public class CustomerServiceImpl implements CustomerService {
 		MutationBatch m = getKeyspace().prepareMutationBatch();
 		
 		m.withRow(CF_CUSTOMER, username)
-			.putColumn("password", password, null);
+			.putColumn("username", username, null)
+			.putColumn("password", password, null)
+			.putColumn("customer_status", status.toString())
+			.putColumn("total_miles", total_miles)
+			.putColumn("miles_ytd", miles_ytd)
+			.putColumn("addr_street1", address.getStreetAddress1(), null)
+			.putColumn("addr_street2", address.getStreetAddress2(), null)
+			.putColumn("addr_city", address.getCity(), null)
+			.putColumn("addr_state_province", address.getStateProvince(), null)
+			.putColumn("addr_country", address.getCountry(), null)
+			.putColumn("addr_postal_code", address.getPostalCode(), null)
+			.putColumn("phone_number", phoneNumber, null)
+			.putColumn("phone_number_type", phoneNumberType.toString(), null);
 		
 		try {
 		  OperationResult<Void> result = m.execute();
@@ -106,6 +118,9 @@ public class CustomerServiceImpl implements CustomerService {
 		        .setMaxConnsPerHost(1)
 		        .setSeeds("cass1:9160")
 		    )
+		    .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()      
+		    	.setCqlVersion("3.0.0")
+		    	.setTargetCassandraVersion("1.2"))
 		    .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
 		    .buildKeyspace(ThriftFamilyFactory.getInstance());
 
