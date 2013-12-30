@@ -22,7 +22,7 @@
 		be specified for component-scanning -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>com.acmeair.services.authService.WXSDirectAppConfig</param-value>
+		<param-value>com.acmeair.services.authService.CassandraAstyanaxConfig</param-value>
 	</context-param>
 
 	<!-- Bootstrap the root application context as usual using ContextLoaderListener -->
@@ -49,6 +49,7 @@
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
 	
+<!-- 
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
@@ -61,6 +62,7 @@
     <filter-mapping>
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>	
+    </filter-mapping>
+-->	
 
 </web-app>

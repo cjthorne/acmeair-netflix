@@ -4,14 +4,16 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.AirportCodeMapping;
-import com.acmeair.entities.Customer;
 import com.acmeair.entities.Flight;
 import com.acmeair.entities.FlightPK;
 import com.acmeair.entities.FlightSegment;
 import com.acmeair.service.FlightService;
+import com.acmeair.service.KeyGenerator;
 import com.netflix.astyanax.MutationBatch;
 import com.netflix.astyanax.model.ColumnFamily;
 import com.netflix.astyanax.serializers.StringSerializer;
@@ -21,6 +23,10 @@ public class FlightServiceImpl implements FlightService {
 
 	private static final ColumnFamily<String, String> CF_AIRPORT_CODE_MAPPING = new ColumnFamily<String, String>("airport_code_mapping", StringSerializer.get(), StringSerializer.get());
 	private static final ColumnFamily<String, String> CF_FLIGHT_SEGMENT = new ColumnFamily<String, String>("flight_segment", StringSerializer.get(), StringSerializer.get());
+	private static final ColumnFamily<String, String> CF_FLIGHT = new ColumnFamily<String, String>("flight", StringSerializer.get(), StringSerializer.get());
+
+	@Resource
+	KeyGenerator keyGenerator;
 
 	@Override
 	public Flight getFlightByFlightKey(FlightPK key) {
@@ -63,8 +69,36 @@ public class FlightServiceImpl implements FlightService {
 			BigDecimal firstClassBaseCost, BigDecimal economyClassBaseCost,
 			int numFirstClassSeats, int numEconomyClassSeats,
 			String airplaneTypeId) {
-		// TODO Auto-generated method stub
-		return null;
+		String id = keyGenerator.generate().toString();
+		Flight flight = new Flight(id, flightSegmentId,
+			scheduledDepartureTime, scheduledArrivalTime,
+			firstClassBaseCost, economyClassBaseCost,
+			numFirstClassSeats, numEconomyClassSeats,
+			airplaneTypeId);
+		
+		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
+		
+		m.withRow(CF_FLIGHT, flight.getPkey().getId())
+			.putColumn("flight_id", flight.getPkey().getId(), null)
+			.putColumn("flight_segment_id", flight.getPkey().getFlightSegmentId(), null)
+			.putColumn("scheduled_departure_time", flight.getScheduledDepartureTime(), null)
+			.putColumn("scheduled_arrival_time", flight.getScheduledArrivalTime(), null)
+			// TODO:  why doesn't putColumn support BigDecimal
+			.putColumn("first_class_base_cost", flight.getFirstClassBaseCost().floatValue(), null)
+			// TODO:  why doesn't putColumn support BigDecimal
+			.putColumn("economy_class_base_cost", flight.getEconomyClassBaseCost().floatValue(), null)
+			.putColumn("num_first_class_seats", flight.getNumFirstClassSeats(), null)
+			.putColumn("num_economy_class_seats", flight.getNumEconomyClassSeats(), null)
+			.putColumn("airplane_type_id", flight.getAirplaneTypeId(), null);
+		
+		try {
+		  m.execute();
+		  return flight;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	@Override

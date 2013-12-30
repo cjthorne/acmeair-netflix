@@ -60,6 +60,7 @@ project(':acmeair-webapp') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
+		compile project(':acmeair-services-astyanax')
 		compile 'commons-io:commons-io:2.4'
 		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 		
@@ -110,6 +111,7 @@ project(':acmeair-auth-service') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
+		compile project(':acmeair-services-astyanax')
 		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 
 		runtime 'org.springframework:spring-web:3.1.2.RELEASE'

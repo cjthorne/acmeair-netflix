@@ -31,8 +31,32 @@ CREATE TABLE airport_code_mapping (
 ) WITH COMPACT STORAGE;
 
 CREATE TABLE flight_segment (
-  flight_segment_id text PRIMARY_KEY,
+  flight_segment_id text PRIMARY KEY,
   origin_port text,
   dest_port text,
   miles int
+) WITH COMPACT STORAGE;
+
+CREATE TABLE flight (
+  flight_id text,
+  flight_segment_id text,
+  scheduled_departure_time timestamp,
+  scheduled_arrival_time timestamp,
+// TODO:  why doesn't putColumn support BigDecimal
+  first_class_base_cost float,
+// TODO:  why doesn't putColumn support BigDecimal
+  economy_class_base_cost float,
+  num_first_class_seats int,
+  num_economy_class_seats int,
+  airplane_type_id text,
+// TODO: COMPACT STORAGE doesn't allow clustering columns and originally
+// FlightPK = flight_id + flight_segment_id
+  PRIMARY KEY (flight_id)
+) WITH COMPACT STORAGE;
+
+CREATE TABLE customer_session (
+  session_id text PRIMARY KEY,
+  customer_id text,
+  last_accessed_time timestamp,
+  timeout_time timestamp
 ) WITH COMPACT STORAGE;

@@ -63,7 +63,7 @@ public class Loader {
 		try {
 			long start = System.currentTimeMillis();
 			logger.info("Start loading flights");
-			//flightLoader.loadFlights();
+			flightLoader.loadFlights();
 			logger.info("Start loading " +  numCustomers + " customers");
 			customerLoader.loadCustomers(Long.parseLong(numCustomers));
 			long stop = System.currentTimeMillis();
