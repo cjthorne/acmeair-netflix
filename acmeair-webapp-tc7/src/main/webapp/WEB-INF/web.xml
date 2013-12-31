@@ -22,7 +22,7 @@
 		be specified for component-scanning -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>com.acmeair.web.config.WXSDirectAppConfig</param-value>
+		<param-value>com.acmeair.web.config.CassandraAstyanaxConfig</param-value>
 	</context-param>
 
 	<filter>
@@ -58,7 +58,8 @@
 		<servlet-name>javax.ws.rs.core.Application</servlet-name>
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
-	
+
+<!-- TODO: eventually go back to eureka/karyon
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
@@ -71,5 +72,6 @@
     <filter-mapping>
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>	
+    </filter-mapping>
+-->	
 </web-app>

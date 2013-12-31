@@ -17,10 +17,8 @@ package com.acmeair.web.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 
 @Configuration
-@ImportResource({"classpath:/spring-config-acmeair-data-wxs-direct.xml"})
-@ComponentScan(basePackages={"com.acmeair.wxs.service"})
-public class WXSDirectAppConfig {
+@ComponentScan(basePackages={"com.acmeair.service.astyanax"})
+public class CassandraAstyanaxConfig {
 }

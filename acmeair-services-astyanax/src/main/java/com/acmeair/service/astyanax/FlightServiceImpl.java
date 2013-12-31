@@ -52,7 +52,6 @@ public class FlightServiceImpl implements FlightService {
 		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
 
 		m.withRow(CF_AIRPORT_CODE_MAPPING, mapping.getAirportCode())
-			.putColumn("airport_code", mapping.getAirportCode(), null)
 			.putColumn("airport_name", mapping.getAirportName(), null);
 
 		try {
@@ -79,7 +78,6 @@ public class FlightServiceImpl implements FlightService {
 		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
 		
 		m.withRow(CF_FLIGHT, flight.getPkey().getId())
-			.putColumn("flight_id", flight.getPkey().getId(), null)
 			.putColumn("flight_segment_id", flight.getPkey().getFlightSegmentId(), null)
 			.putColumn("scheduled_departure_time", flight.getScheduledDepartureTime(), null)
 			.putColumn("scheduled_arrival_time", flight.getScheduledArrivalTime(), null)
@@ -106,7 +104,6 @@ public class FlightServiceImpl implements FlightService {
 		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
 
 		m.withRow(CF_FLIGHT_SEGMENT, flightSeg.getFlightName())
-			.putColumn("flight_segment_id", flightSeg.getFlightName(), null)
 			.putColumn("origin_port", flightSeg.getOriginPort(), null)
 			.putColumn("dest_port", flightSeg.getDestPort(), null)
 			.putColumn("miles", flightSeg.getMiles(), null);

@@ -5,6 +5,8 @@ import java.util.Date;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.Customer;
@@ -27,33 +29,35 @@ public class CustomerServiceImpl implements CustomerService {
 	private static final ColumnFamily<String, String> CF_CUSTOMER = new ColumnFamily<String, String>("customer", StringSerializer.get(), StringSerializer.get());
 	private static final ColumnFamily<String, String> CF_CUSTOMER_SESSION = new ColumnFamily<String, String>("customer_session", StringSerializer.get(), StringSerializer.get());
 	
+	private static Logger log = LoggerFactory.getLogger(CustomerServiceImpl.class);
+	
 	@Resource
 	KeyGenerator keyGenerator;
 
-	@Override
 	public Customer createCustomer(String username, String password,
 			MemberShipStatus status, int total_miles, int miles_ytd,
 			String phoneNumber, PhoneType phoneNumberType,
 			CustomerAddress address) {
-		
 		Customer customer = new Customer(username, password, status, total_miles, miles_ytd, address, phoneNumber, phoneNumberType);
-
+		return upsertCustomer(customer);
+	}
+	
+	private Customer upsertCustomer(Customer customer) {
 		MutationBatch m = CUtils.getKeyspace().prepareMutationBatch();
 		
-		m.withRow(CF_CUSTOMER, username)
-			.putColumn("username", username, null)
-			.putColumn("password", password, null)
-			.putColumn("customer_status", status.toString(), null)
-			.putColumn("total_miles", total_miles, null)
-			.putColumn("miles_ytd", miles_ytd, null)
-			.putColumn("addr_street1", address.getStreetAddress1(), null)
-			.putColumn("addr_street2", address.getStreetAddress2(), null)
-			.putColumn("addr_city", address.getCity(), null)
-			.putColumn("addr_state_province", address.getStateProvince(), null)
-			.putColumn("addr_country", address.getCountry(), null)
-			.putColumn("addr_postal_code", address.getPostalCode(), null)
-			.putColumn("phone_number", phoneNumber, null)
-			.putColumn("phone_number_type", phoneNumberType.toString(), null);
+		m.withRow(CF_CUSTOMER, customer.getUsername())
+			.putColumn("password", customer.getPassword(), null)
+			.putColumn("customer_status", customer.getStatus().toString(), null)
+			.putColumn("total_miles", customer.getTotal_miles(), null)
+			.putColumn("miles_ytd", customer.getMiles_ytd(), null)
+			.putColumn("addr_street1", customer.getAddress().getStreetAddress1(), null)
+			.putColumn("addr_street2", customer.getAddress().getStreetAddress2(), null)
+			.putColumn("addr_city", customer.getAddress().getCity(), null)
+			.putColumn("addr_state_province", customer.getAddress().getStateProvince(), null)
+			.putColumn("addr_country", customer.getAddress().getCountry(), null)
+			.putColumn("addr_postal_code", customer.getAddress().getPostalCode(), null)
+			.putColumn("phone_number", customer.getPhoneNumber(), null)
+			.putColumn("phone_number_type", customer.getPhoneNumberType().toString(), null);
 		
 		try {
 		  m.execute();
@@ -66,27 +70,74 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public Customer updateCustomer(Customer customer) {
-		// TODO Auto-generated method stub
-		return null;
+		return upsertCustomer(customer);
 	}
 
+	private Customer getCustomer(String username) {
+		try {
+			ColumnList<String> result = CUtils.getKeyspace().prepareQuery(CF_CUSTOMER)
+				.getKey(username).execute().getResult();
+				if (!result.isEmpty()) {
+					CustomerAddress address = new CustomerAddress(
+						result.getStringValue("addr_street1", null),
+						result.getStringValue("addr_street2", null),
+						result.getStringValue("addr_city", null),
+						result.getStringValue("addr_state_province", null),
+						result.getStringValue("addr_country", null),
+						result.getStringValue("addr_postal_code", null)
+					);
+					PhoneType phoneType = PhoneType.valueOf(result.getStringValue("phone_number_type", PhoneType.HOME.toString()));
+					MemberShipStatus memStatus = MemberShipStatus.valueOf(result.getStringValue("customer_status", MemberShipStatus.NONE.toString()));
+					Customer customer = new Customer(
+						username,
+						result.getStringValue("password", null),
+						memStatus,
+						result.getIntegerValue("total_miles", 0),
+						result.getIntegerValue("miles_ytd", 0),
+						address,
+						result.getStringValue("phone_number", null),
+						phoneType
+					);
+					return customer;
+				}
+				else {
+					return null;
+				}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+	
 	@Override
 	public Customer getCustomerByUsername(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer c = getCustomer(username);
+		if (c != null) {
+			c.setPassword(null);
+		}
+		return c;
 	}
 
 	@Override
 	public boolean validateCustomer(String username, String password) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean validatedCustomer = false;
+		Customer customerToValidate = getCustomer(username);
+		if (customerToValidate != null) {
+			validatedCustomer = password.equals(customerToValidate.getPassword());
+		}
+		return validatedCustomer;
 	}
 
 	@Override
 	public Customer getCustomerByUsernameAndPassword(String username,
 			String password) {
-		// TODO Auto-generated method stub
-		return null;
+		Customer c = getCustomer(username);
+		if (!c.getPassword().equals(password)) {
+			return null;
+		}
+		// Should we also set the password to null?
+		return c;
 	}
 
 	@Override

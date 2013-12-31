@@ -49,7 +49,7 @@
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
 	
-<!-- 
+<!-- TODO: eventually go back to eureka/karyon
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>

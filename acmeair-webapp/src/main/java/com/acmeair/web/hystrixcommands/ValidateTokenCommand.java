@@ -54,6 +54,9 @@ public class ValidateTokenCommand extends HystrixCommand<CustomerSession> {
 	protected CustomerSession run() throws Exception {
 		String responseString = null;
 		try {
+			// TODO: Eventually go back to eureka
+			CreateTokenCommand.switchServerList();
+
 			RestClient client = (RestClient) ClientFactory.getNamedClient(CommandConstants.ACME_AIR_AUTH_SERVICE_NAMED_CLIENT);
 	
 			HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.GET).setUri(new URI(CommandConstants.ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH + "/authtoken/" + tokenid)).build();

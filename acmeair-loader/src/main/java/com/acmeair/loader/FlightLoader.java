@@ -32,7 +32,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FlightLoader {
 	
-	private static final int MAX_FLIGHTS_PER_SEGMENT = 30;
+	// TODO: size this back for now
+	private static final int MAX_FLIGHTS_PER_SEGMENT = 1;
 	
 	@Resource
 	private FlightService flightService;
