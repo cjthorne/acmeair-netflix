@@ -32,11 +32,11 @@ create column family airport_code_mapping
   ];
   
 create column family flight_segment
-  with key_validation_class = UTF8Type
-  and comparator = UTF8Type
+-- origin_port, dest_port
+  with key_validation_class = 'UTF8Type'
+-- origin_port (duplicate), dest_port
+  and comparator = 'CompositeType(UTF8Type, UTF8Type)'
   and column_metadata = [
-    {column_name: origin_port, validation_class: UTF8Type},
-    {column_name: dest_port, validation_class: UTF8Type},
     {column_name: miles, validation_class: IntegerType},
   ];
 

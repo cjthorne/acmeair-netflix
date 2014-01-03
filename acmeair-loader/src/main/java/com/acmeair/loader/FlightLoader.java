@@ -136,4 +136,10 @@ public class FlightLoader {
 		}
 		return false;
 	}
+	
+	// TODO: Needed in datastax based loader, if removed, remove from here too
+	public void closeDatasource() {
+		System.out.println("closing c* cluster");
+		flightService.closeDatasource();
+	}
 }

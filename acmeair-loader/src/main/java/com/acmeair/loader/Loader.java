@@ -67,6 +67,8 @@ public class Loader {
 			logger.info("Start loading " +  numCustomers + " customers");
 			customerLoader.loadCustomers(Long.parseLong(numCustomers));
 			long stop = System.currentTimeMillis();
+			// TODO: Needed in datastax based loader, if removed, remove from here too
+			flightLoader.closeDatasource();
 			logger.info("Finished loading in " + (stop - start)/1000.0 + " seconds");
 		}
 		catch (Exception e) {

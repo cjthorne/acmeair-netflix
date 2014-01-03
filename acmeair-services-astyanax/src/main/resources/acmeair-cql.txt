@@ -6,57 +6,69 @@ CREATE KEYSPACE acmeair
 
 USE acmeair;
 
+CREATE TABLE airport_code_mapping (
+  airport_code text PRIMARY KEY,
+  airport_name text,
+);
+
+CREATE TABLE flight_segment (
+// TODO: Consider moving to uuid since Java code is already doing uuid's
+  flight_segment_id text,
+  origin_port text,
+  dest_port text,
+  miles int,
+  PRIMARY KEY (origin_port, dest_port)
+);
+
+CREATE TABLE flight (
+  flight_id text,
+  flight_segment_id text,
+// TODO: delete this hack comment and comments below as this was to support range queries
+// and code just does equal to departure date query.  Still need to understand secondary
+// range query indexes better
+// see comment below on this "hack" for now
+//  flight_segment_id_copy text,
+  scheduled_departure_time timestamp,
+  scheduled_arrival_time timestamp,
+  first_class_base_cost decimal,
+  economy_class_base_cost decimal,
+  num_first_class_seats int,
+  num_economy_class_seats int,
+  airplane_type_id text,
+  PRIMARY KEY (flight_segment_id)
+);
+
+// TODO: the following query doesn't work, as it seems like in non-primary key part
+// of where clause must include at least one equal for range queries:
+// select * from flight where flight_segment_id = ? and scheduled_departure_time > a and scheduled_arrive_time < b
+// so, as a hack I added a indexed column that could be known to be equal (a copy of the primary key)
+// select * from flight where flight_segment_id = 'a' and flight_segment_id_copy = 'a' and
+//   scheduled_arrival_time > dateof(now()) and scheduled_departure_time < dateof(now()) ALLOW FILTERING;
+// Really need to understand this as it seems like I don't fully understand ranged secondary indexes at this point
+//CREATE INDEX flight_flight_segment_id_copy ON flight (flight_segment_id_copy);
+CREATE INDEX flight_scheduled_departure_time ON flight (scheduled_departure_time);
+//CREATE INDEX flight_scheduled_arrival_time ON flight (scheduled_arrival_time);
+
 CREATE TABLE customer (
   username text PRIMARY KEY,
   password text,
   customer_status text,
   total_miles int,
   miles_ytd int,
-// TODO: look into column families and queries eventually
   addr_street1 text,
   addr_street2 text,
   addr_city text,
   addr_state_province text,
   addr_country text,
   addr_postal_code text,
-// TODO: COMPACT STORAGE doesn't work with collection types
-//  phone_numbers map<text, text>
+// TODO: consider moving to phone_numbers map<text, text>
   phone_number text,
   phone_number_type text
-) WITH COMPACT STORAGE;
-
-CREATE TABLE airport_code_mapping (
-  airport_code text PRIMARY KEY,
-  airport_name text,
-) WITH COMPACT STORAGE;
-
-CREATE TABLE flight_segment (
-  flight_segment_id text PRIMARY KEY,
-  origin_port text,
-  dest_port text,
-  miles int
-) WITH COMPACT STORAGE;
-
-CREATE TABLE flight (
-  flight_id text,
-  flight_segment_id text,
-  scheduled_departure_time timestamp,
-  scheduled_arrival_time timestamp,
-// TODO:  why doesn't putColumn support BigDecimal
-  first_class_base_cost float,
-// TODO:  why doesn't putColumn support BigDecimal
-  economy_class_base_cost float,
-  num_first_class_seats int,
-  num_economy_class_seats int,
-  airplane_type_id text,
-// TODO: COMPACT STORAGE doesn't allow clustering columns and originally
-// FlightPK = flight_id + flight_segment_id
-  PRIMARY KEY (flight_id)
-) WITH COMPACT STORAGE;
+);
 
 CREATE TABLE customer_session (
   session_id text PRIMARY KEY,
   customer_id text,
   last_accessed_time timestamp,
   timeout_time timestamp
-) WITH COMPACT STORAGE;
+);
