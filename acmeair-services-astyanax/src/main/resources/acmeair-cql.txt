@@ -23,11 +23,6 @@ CREATE TABLE flight_segment (
 CREATE TABLE flight (
   flight_id text,
   flight_segment_id text,
-// TODO: delete this hack comment and comments below as this was to support range queries
-// and code just does equal to departure date query.  Still need to understand secondary
-// range query indexes better
-// see comment below on this "hack" for now
-//  flight_segment_id_copy text,
   scheduled_departure_time timestamp,
   scheduled_arrival_time timestamp,
   first_class_base_cost decimal,
@@ -35,19 +30,10 @@ CREATE TABLE flight (
   num_first_class_seats int,
   num_economy_class_seats int,
   airplane_type_id text,
-  PRIMARY KEY (flight_segment_id)
+  PRIMARY KEY (flight_segment_id, scheduled_departure_time)
 );
 
-// TODO: the following query doesn't work, as it seems like in non-primary key part
-// of where clause must include at least one equal for range queries:
-// select * from flight where flight_segment_id = ? and scheduled_departure_time > a and scheduled_arrive_time < b
-// so, as a hack I added a indexed column that could be known to be equal (a copy of the primary key)
-// select * from flight where flight_segment_id = 'a' and flight_segment_id_copy = 'a' and
-//   scheduled_arrival_time > dateof(now()) and scheduled_departure_time < dateof(now()) ALLOW FILTERING;
-// Really need to understand this as it seems like I don't fully understand ranged secondary indexes at this point
-//CREATE INDEX flight_flight_segment_id_copy ON flight (flight_segment_id_copy);
-CREATE INDEX flight_scheduled_departure_time ON flight (scheduled_departure_time);
-//CREATE INDEX flight_scheduled_arrival_time ON flight (scheduled_arrival_time);
+CREATE INDEX flight_flight_id ON flight (flight_id);
 
 CREATE TABLE customer (
   username text PRIMARY KEY,
@@ -71,4 +57,12 @@ CREATE TABLE customer_session (
   customer_id text,
   last_accessed_time timestamp,
   timeout_time timestamp
+);
+
+CREATE TABLE booking (
+  customer_id text,
+  booking_id text,
+  flight_id text,
+  booking_date timestamp,
+  PRIMARY KEY (customer_id, booking_id)
 );
