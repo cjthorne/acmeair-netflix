@@ -71,6 +71,7 @@ public class FlightServiceImpl implements FlightService {
 	private static PreparedStatement INSERT_INTO_AIRPORT_CODE_MAPPING_PS;
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_SEGMENT_BY_PORTS_PS;
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_PS;
+	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_ID_PS;
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS;
 	
 	static {
@@ -92,6 +93,9 @@ public class FlightServiceImpl implements FlightService {
 		SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_PS = CUtils.getAcmeAirSession().prepare(
 			"SELECT * FROM flight where flight_segment_id = ?;"
 		);
+		SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_ID_PS = CUtils.getAcmeAirSession().prepare(
+			"SELECT * FROM flight where flight_segment_id = ? and flight_id = ?;"
+		);
 		SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS = CUtils.getAcmeAirSession().prepare(
 			"SELECT * FROM flight WHERE flight_segment_id = ? and scheduled_departure_time = ?"
 		);
@@ -102,8 +106,33 @@ public class FlightServiceImpl implements FlightService {
 	
 	@Override
 	public Flight getFlightByFlightKey(FlightPK key) {
-		// TODO Auto-generated method stub
-		return null;
+		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_ID_PS);
+		bs.bind(key.getFlightSegmentId(), key.getId());
+		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
+		int ii = 0;
+		Flight flight = null;
+		flight = flightPKtoFlightCache.get(key);
+		if (flight == null) {
+			for (Row row : rs) {
+				Date scheduled_departure_time = row.getDate("scheduled_departure_time");
+				Date scheduled_arrival_time = row.getDate("scheduled_arrival_time");
+				BigDecimal first_class_base_cost = row.getDecimal("first_class_base_cost");
+				BigDecimal economy_class_base_cost = row.getDecimal("economy_class_base_cost");
+				int num_first_class_seats = row.getInt("num_first_class_seats");
+				int num_economy_class_seats = row.getInt("num_economy_class_seats");
+				String airplane_type_id = row.getString("airplane_type_id");
+				flight = new Flight(key.getId(), key.getFlightSegmentId(), scheduled_departure_time, scheduled_arrival_time,
+					first_class_base_cost, economy_class_base_cost, num_first_class_seats, num_economy_class_seats, airplane_type_id);
+				ii++;
+			}
+			if (ii > 1) {
+				log.warn("more than one flight segment row returned, using last");
+			}
+			if (key != null && flight != null) {
+				flightPKtoFlightCache.putIfAbsent(key, flight);
+			}
+		}
+		return flight;
 	}
 
 	@Override

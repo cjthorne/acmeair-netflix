@@ -63,6 +63,7 @@ CREATE TABLE booking (
   customer_id text,
   booking_id text,
   flight_id text,
+  flight_segment_id text,
   booking_date timestamp,
   PRIMARY KEY (customer_id, booking_id)
 );
