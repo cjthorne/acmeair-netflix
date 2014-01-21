@@ -12,9 +12,7 @@
 		instead of the default XmlWebApplicationContext -->
 	<context-param>
 		<param-name>contextClass</param-name>
-		<param-value>
-          org.springframework.web.context.support.AnnotationConfigWebApplicationContext
-      </param-value>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
 	</context-param>
 
 	<!-- Configuration locations must consist of one or more comma- or space-delimited 
@@ -49,7 +47,6 @@
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
 	
-<!-- TODO: eventually go back to eureka/karyon
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
@@ -63,6 +60,5 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
--->	
 
 </web-app>
