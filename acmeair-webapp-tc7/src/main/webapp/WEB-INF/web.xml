@@ -59,7 +59,6 @@
 		<url-pattern>/rest/api/*</url-pattern>
 	</servlet-mapping>
 
-<!-- TODO: eventually go back to eureka/karyon
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
@@ -73,5 +72,4 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
--->	
 </web-app>

@@ -50,20 +50,10 @@ public class CreateTokenCommand extends HystrixCommand<CustomerSession> {
         this.userid = userid;
 	}
 	
-	// TODO: Eventually go back to eureka
-	public static void switchServerList() {
-		String serverList = "cass252:8080";
-		log.info("switching server list to " + serverList); 
-		ConfigurationManager.getConfigInstance().setProperty("acmeair-auth-service-client.ribbon.listOfServers", serverList);
-	}
-	
 	@Override
 	protected CustomerSession run() throws Exception {
 		String responseString = null;
 		try {
-			// TODO: Eventually go back to eureka
-			CreateTokenCommand.switchServerList();
-			
 			RestClient client = (RestClient) ClientFactory.getNamedClient(CommandConstants.ACME_AIR_AUTH_SERVICE_NAMED_CLIENT);
 	
 			HttpClientRequest request = HttpClientRequest.newBuilder().setVerb(Verb.POST).setUri(new URI(CommandConstants.ACME_AIR_AUTH_SERVICE_CONTEXT_AND_REST_PATH + "/authtoken/byuserid/" + userid)).build();
