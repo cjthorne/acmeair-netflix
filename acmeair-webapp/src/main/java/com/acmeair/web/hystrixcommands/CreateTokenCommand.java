@@ -25,7 +25,6 @@ import com.netflix.niws.client.http.HttpClientRequest.Verb;
 import com.netflix.niws.client.http.HttpClientResponse;
 import com.netflix.niws.client.http.RestClient;
 import com.netflix.client.ClientFactory;
-import com.netflix.config.ConfigurationManager;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;

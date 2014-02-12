@@ -101,10 +101,15 @@ project(':acmeair-webapp-tc7') {
 		providedRuntime 'javax:javaee-web-api:6.0'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
+		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
 	}
 	
+	FileTree cpTree = fileTree('../patchedJars')
 	war {
 		from '../acmeair-webapp/src/main/webapp'
+		classpath {
+			cpTree
+		}
 	}
 }
 
@@ -150,10 +155,15 @@ project(':acmeair-auth-service-tc7') {
 		providedRuntime 'javax:javaee-web-api:6.0'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
+		providedRuntime 'com.netflix.eureka:eureka-client:1.1.73@jar'
 	}
 	
+	FileTree cpTree = fileTree('../patchedJars')
 	war {
 		from '../acmeair-auth-service/src/main/webapp'
+		classpath {
+			cpTree
+		}
 	}
 }
 
