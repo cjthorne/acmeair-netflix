@@ -61,29 +61,29 @@ project(':acmeair-webapp') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-astyanax')
-//		compile 'commons-io:commons-io:2.4'
-//		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 		
+		// spring
 		runtime 'org.springframework:spring-web:3.1.2.RELEASE'
 		runtime 'cglib:cglib:2.2.2'
 		runtime 'org.aspectj:aspectjrt:1.6.8'
 		runtime 'org.aspectj:aspectjweaver:1.6.8'
-//		runtime 'com.google.inject.extensions:guice-servlet:3.0'
-//		runtime 'com.google.inject:guice:3.0'
-//		runtime 'com.netflix.karyon:karyon-server:0.1.2'
-//		runtime 'com.netflix.karyon:karyon-admin-web:1.0.19'
-		runtime 'com.netflix.karyon:karyon-extensions:1.0.22'
+		
+		// logging
 		// netflix uses slf4j 
 		runtime 'org.slf4j:slf4j-api:1.7.2'
 		// spring uses jcl bridge to slf4j
 		runtime 'org.slf4j:jcl-over-slf4j:1.7.2'
 		// use log4j under slf4j
 		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
+		
+		// jersey
 		runtime 'com.sun.jersey:jersey-server:1.17.1'
         runtime 'com.sun.jersey:jersey-core:1.17.1'
         runtime 'com.sun.jersey:jersey-bundle:1.17.1'
         runtime 'com.sun.jersey:jersey-json:1.17.1'
-//        runtime 'com.sun.jersey.contribs:jersey-guice:1.13'
+		
+		// netflix runtime components
+		runtime 'com.netflix.karyon:karyon-extensions:1.0.22'
 		runtime 'com.netflix.hystrix:hystrix-metrics-event-stream:1.3.16'
 		runtime 'com.netflix.ribbon:ribbon-eureka:0.3.12'
 	}
@@ -119,28 +119,29 @@ project(':acmeair-auth-service') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-astyanax')
-		compile 'org.springframework:spring-context:3.1.2.RELEASE'
-
+		
+		// spring
 		runtime 'org.springframework:spring-web:3.1.2.RELEASE'
 		runtime 'cglib:cglib:2.2.2'
 		runtime 'org.aspectj:aspectjrt:1.6.8'
 		runtime 'org.aspectj:aspectjweaver:1.6.8'
-		runtime 'com.google.inject.extensions:guice-servlet:3.0'
-		runtime 'com.google.inject:guice:3.0'
-		runtime 'com.netflix.karyon:karyon-server:0.1.2'
-		runtime 'com.netflix.karyon:karyon-admin-web:1.0.19'
-		runtime 'com.netflix.karyon:karyon-extensions:1.0.19'
-		// netflix uses slf4j 
+		
+		// logging
+		// netflix uses slf4j
 		runtime 'org.slf4j:slf4j-api:1.7.2'
 		// spring uses jcl bridge to slf4j
 		runtime 'org.slf4j:jcl-over-slf4j:1.7.2'
 		// use log4j under slf4j
 		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
+		
+		// jersey
 		runtime 'com.sun.jersey:jersey-server:1.17.1'
-        runtime 'com.sun.jersey:jersey-core:1.17.1'
-        runtime 'com.sun.jersey:jersey-bundle:1.17.1'
-        runtime 'com.sun.jersey:jersey-json:1.17.1'
-        runtime 'com.sun.jersey.contribs:jersey-guice:1.13'
+		runtime 'com.sun.jersey:jersey-core:1.17.1'
+		runtime 'com.sun.jersey:jersey-bundle:1.17.1'
+		runtime 'com.sun.jersey:jersey-json:1.17.1'
+		
+		// netflix runtime components
+		runtime 'com.netflix.karyon:karyon-extensions:1.0.22'
 	}
 }
 
@@ -156,8 +157,8 @@ project(':acmeair-auth-service-tc7') {
 		providedRuntime 'javax:javaee-web-api:6.0'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
-		providedRuntime 'com.netflix.eureka:eureka-client:1.1.128@jar'
-		providedRuntime 'com.netflix.karyon:karyon-eureka:1.0.19@jar'
+		providedRuntime 'com.netflix.eureka:eureka-client:1.1.132@jar'
+		providedRuntime 'com.netflix.karyon:karyon-eureka:2.0.02@jar'
 	}
 	
 	FileTree cpTree = fileTree('../patchedJars')
