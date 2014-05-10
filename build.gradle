@@ -40,7 +40,6 @@ project(':acmeair-services') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile 'org.springframework:spring-context:3.1.2.RELEASE'
-//		testCompile 'cglib:cglib:2.2.2'
 	}
 }
 
@@ -48,9 +47,6 @@ project(':acmeair-services-astyanax') {
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
-//		compile 'com.netflix.astyanax:astyanax-core:1.56.44'
-//		compile 'com.netflix.astyanax:astyanax-thrift:1.56.44'
-//		compile 'com.netflix.astyanax:astyanax-cassandra:1.56.44'
 		compile 'com.datastax.cassandra:cassandra-driver-core:1.0.5'
 	}
 }
@@ -101,16 +97,16 @@ project(':acmeair-webapp-tc7') {
 		providedRuntime 'javax:javaee-web-api:6.0'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
-		providedRuntime 'com.netflix.eureka:eureka-client:1.1.132@jar'
-		providedRuntime 'com.netflix.karyon:karyon-eureka:2.0.02@jar'
+//		providedRuntime 'com.netflix.eureka:eureka-client:1.1.132@jar'
+//		providedRuntime 'com.netflix.karyon:karyon-eureka:2.0.02@jar'
 	}
 	
-	FileTree cpTree = fileTree('../patchedJars')
+//	FileTree cpTree = fileTree('../patchedJars')
 	war {
 		from '../acmeair-webapp/src/main/webapp'
-		classpath {
-			cpTree
-		}
+//		classpath {
+//			cpTree
+//		}
 	}
 }
 
@@ -157,16 +153,16 @@ project(':acmeair-auth-service-tc7') {
 		providedRuntime 'javax:javaee-web-api:6.0'
 		providedRuntime 'javax.servlet:servlet-api:2.5'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
-		providedRuntime 'com.netflix.eureka:eureka-client:1.1.132@jar'
-		providedRuntime 'com.netflix.karyon:karyon-eureka:2.0.02@jar'
+//		providedRuntime 'com.netflix.eureka:eureka-client:1.1.132@jar'
+//		providedRuntime 'com.netflix.karyon:karyon-eureka:2.0.02@jar'
 	}
 	
-	FileTree cpTree = fileTree('../patchedJars')
+//	FileTree cpTree = fileTree('../patchedJars')
 	war {
 		from '../acmeair-auth-service/src/main/webapp'
-		classpath {
-			cpTree
-		}
+//		classpath {
+//			cpTree
+//		}
 	}
 }
 
