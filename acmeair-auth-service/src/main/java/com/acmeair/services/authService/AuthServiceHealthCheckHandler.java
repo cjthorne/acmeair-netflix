@@ -15,13 +15,24 @@
 *******************************************************************************/
 package com.acmeair.services.authService;
 
-import com.netflix.karyon.spi.HealthCheckHandler;
+import com.google.inject.Singleton;
+import com.netflix.karyon.health.HealthCheckHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.annotation.PostConstruct;
 
+@Singleton
 public class AuthServiceHealthCheckHandler implements HealthCheckHandler {
+	private static final Logger logger = LoggerFactory.getLogger(AuthServiceHealthCheckHandler.class);
+
+	@PostConstruct
+	public void init() {
+		logger.info("Health check init");
+	}
 
 	@Override
 	public int getStatus() {
-		// TODO:  AWS - Understand if this is being called
+		logger.info("Health check getStatus");
 		return 200;
 	}
 }

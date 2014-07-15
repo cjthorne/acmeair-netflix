@@ -1,9 +1,10 @@
 package com.acmeair.service.astyanax;
 
-import org.springframework.stereotype.Service;
+import javax.inject.Singleton;
+
 import com.acmeair.service.KeyGenerator;
 
-@Service("keyGenerator")
+@Singleton
 public class DefaultKeyGeneratorImpl implements KeyGenerator {
 
 	@Override

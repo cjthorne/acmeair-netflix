@@ -3,11 +3,11 @@ package com.acmeair.service.astyanax;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.Customer;
 import com.acmeair.entities.Customer.MemberShipStatus;
@@ -19,23 +19,16 @@ import com.acmeair.service.KeyGenerator;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-//import com.netflix.astyanax.MutationBatch;
-//import com.netflix.astyanax.model.ColumnFamily;
-//import com.netflix.astyanax.model.ColumnList;
-//import com.netflix.astyanax.serializers.StringSerializer;
 import com.datastax.driver.core.PreparedStatement;
 
-@Service("customerService")
+@Singleton
 public class CustomerServiceImpl implements CustomerService {
 
 	private static final int DAYS_TO_ALLOW_SESSION = 1;
 
-//	private static final ColumnFamily<String, String> CF_CUSTOMER = new ColumnFamily<String, String>("customer", StringSerializer.get(), StringSerializer.get());
-//	private static final ColumnFamily<String, String> CF_CUSTOMER_SESSION = new ColumnFamily<String, String>("customer_session", StringSerializer.get(), StringSerializer.get());
-	
 	private static Logger log = LoggerFactory.getLogger(CustomerServiceImpl.class);
 	
-	@Resource
+	@Inject
 	KeyGenerator keyGenerator;
 
 	static {
