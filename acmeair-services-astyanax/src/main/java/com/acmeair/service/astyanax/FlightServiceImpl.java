@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.acmeair.entities.AirportCodeMapping;
 import com.acmeair.entities.Flight;
@@ -32,7 +32,7 @@ import com.datastax.driver.core.ResultSet;
 //import com.netflix.astyanax.annotations.Component;
 import com.datastax.driver.core.Row;
 
-@Service("flightService")
+@Singleton
 public class FlightServiceImpl implements FlightService {
 
 //	public static class FlightSegmentSer {

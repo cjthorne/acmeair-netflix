@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Singleton;
 
 import com.acmeair.entities.Booking;
 import com.acmeair.entities.BookingPK;
@@ -22,10 +23,8 @@ import com.datastax.driver.core.Row;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-
-@Service("bookingService")
+@Singleton
 public class BookingServiceImpl implements BookingService {
 
 	@Resource

@@ -20,8 +20,9 @@ subprojects {
     
     dependencies {
 	compile 'com.netflix.hystrix:hystrix-core:1.4.0-RC4'
-	compile 'com.netflix.ribbon:ribbon-core:2.0-RC2'
-	compile 'com.netflix.ribbon:ribbon-httpclient:2.0-RC2'
+	compile 'com.netflix.ribbon:ribbon:2.0-RC3'
+	compile 'com.netflix.ribbon:ribbon-core:2.0-RC3'
+	compile 'com.netflix.ribbon:ribbon-httpclient:2.0-RC3'
 	compile 'com.netflix.karyon:karyon-jersey-blocking:2.1.00-RC2'
 	compile 'com.netflix.karyon:karyon-admin-web:2.1.00-RC2'
     }
@@ -39,7 +40,6 @@ project(':acmeair-common') {
 project(':acmeair-services') {
 	dependencies {
 		compile project(':acmeair-common')
-		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 	}
 }
 
@@ -58,17 +58,13 @@ project(':acmeair-webapp') {
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-astyanax')
 		
-		compile 'com.netflix.ribbon:ribbon:2.0-RC2'
-		compile	'com.netflix.ribbon:ribbon-eureka:2.0-RC2'
+		compile	'com.netflix.ribbon:ribbon-eureka:2.0-RC3'
 	}
 }
 
 project(':acmeair-ribbon-test') {
 	apply plugin: 'application'
 	dependencies {
-		compile 'com.netflix.ribbon:ribbon:2.0-RC3'
-		compile 'com.netflix.ribbon:ribbon-core:2.0-RC3'
-		compile 'com.netflix.ribbon:ribbon-httpclient:2.0-RC3'
 		runtime 'com.netflix.ribbon:ribbon-eureka:2.0-RC3'
 		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
 	}
@@ -109,7 +105,6 @@ project(':acmeair-loader') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-astyanax')
-		compile 'org.springframework:spring-context:3.1.2.RELEASE'
 	}
 }
 
