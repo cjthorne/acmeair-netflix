@@ -22,14 +22,13 @@ import java.util.*;
 import java.math.*;
 
 import javax.annotation.Resource;
+import javax.inject.Singleton;
 
 import com.acmeair.entities.AirportCodeMapping;
 import com.acmeair.entities.FlightSegment;
 import com.acmeair.service.FlightService;
 
-import org.springframework.stereotype.Component;
-
-@Component
+@Singleton
 public class FlightLoader {
 	
 	// TODO: size this back for now

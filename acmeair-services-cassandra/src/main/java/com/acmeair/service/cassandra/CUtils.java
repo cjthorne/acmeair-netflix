@@ -1,4 +1,4 @@
-package com.acmeair.service.astyanax;
+package com.acmeair.service.cassandra;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

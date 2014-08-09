@@ -17,6 +17,7 @@ package com.acmeair.web;
 
 import java.util.*;
 
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -28,8 +29,8 @@ import com.acmeair.service.BookingService;
 
 @Path("/bookings")
 public class BookingsREST {
-	
-	private BookingService bs = ServiceLocator.getService(BookingService.class);
+	@Inject // TODO: Need to figure out how to force the container to do this for me
+	private BookingService bs = WebAppGuiceContextListener.getWebAppInjector().getInstance(BookingService.class);
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})

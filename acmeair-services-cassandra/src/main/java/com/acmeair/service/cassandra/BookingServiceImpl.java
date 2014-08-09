@@ -1,10 +1,11 @@
-package com.acmeair.service.astyanax;
+package com.acmeair.service.cassandra;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import com.acmeair.entities.Booking;
 import com.acmeair.entities.BookingPK;
@@ -22,16 +23,14 @@ import com.datastax.driver.core.Row;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-
-@Service("bookingService")
+@Singleton
 public class BookingServiceImpl implements BookingService {
 
-	@Resource
+	@Inject
 	FlightService flightService;
 
-	@Resource
+	@Inject
 	CustomerService customerService;
 
 	private static PreparedStatement INSERT_INTO_BOOKING_PS;
@@ -39,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
 	private static PreparedStatement SELECT_ALL_BOOKINGS_BY_USER_ID_PS;
 	private static PreparedStatement DELETE_FROM_BOOKING_BY_USER_ID_AND_BOOKING_ID_PS;
 
-	@Resource
+	@Inject
 	KeyGenerator keyGenerator;
 	
 	private static Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);

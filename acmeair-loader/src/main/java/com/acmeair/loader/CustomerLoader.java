@@ -20,10 +20,10 @@ import com.acmeair.entities.CustomerAddress;
 import com.acmeair.entities.Customer.PhoneType;
 import com.acmeair.service.CustomerService;
 
-import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
+import javax.inject.Singleton;
 
-@Component
+@Singleton
 public class CustomerLoader {
 
 	@Resource

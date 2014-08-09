@@ -15,22 +15,21 @@
 *******************************************************************************/
 package com.acmeair.web;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
-import org.springframework.stereotype.Component;
-
 import com.acmeair.entities.*;
 import com.acmeair.service.*;
-
 import javax.ws.rs.core.Context;
 
 @Path("/customer")
-@Component
+@Singleton
 public class CustomerREST {
-	
-	private CustomerService customerService = ServiceLocator.getService(CustomerService.class);
+	@Inject // TODO: Need to figure out how to force the container to do this for me
+	private CustomerService customerService = WebAppGuiceContextListener.getWebAppInjector().getInstance(CustomerService.class);
 	
 	@Context 
 	private HttpServletRequest request;

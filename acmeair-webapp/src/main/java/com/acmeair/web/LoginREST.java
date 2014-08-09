@@ -15,10 +15,10 @@
 *******************************************************************************/
 package com.acmeair.web;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-
-import org.springframework.stereotype.Component;
 
 import com.acmeair.entities.CustomerSession;
 import com.acmeair.service.*;
@@ -26,12 +26,12 @@ import com.acmeair.web.hystrixcommands.*;
 
 
 @Path("/login")
-@Component
+@Singleton
 public class LoginREST {
 	
 	public static String SESSIONID_COOKIE_NAME = "sessionid";
-
-	private CustomerService customerService = ServiceLocator.getService(CustomerService.class);
+	@Inject // TODO: Need to figure out how to force the container to do this for me
+	private CustomerService customerService = WebAppGuiceContextListener.getWebAppInjector().getInstance(CustomerService.class);
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -31,8 +32,8 @@ import com.acmeair.web.TripLegInfo;
 
 @Path("/flights")
 public class FlightsREST {
-	
-	private FlightService flightService = ServiceLocator.getService(FlightService.class);
+	@Inject // TODO: Need to figure out how to force the container to do this for me
+	private FlightService flightService = WebAppGuiceContextListener.getWebAppInjector().getInstance(FlightService.class);
 	
 	// TODO:  Consider a pure GET implementation of this service, but maybe not much value due to infrequent similar searches
 	@POST

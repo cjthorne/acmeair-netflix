@@ -20,12 +20,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Loader {
+	@Inject
+	FlightLoader flightLoader;
+	
+	@Inject
+	CustomerLoader customerLoader;
+	
 	private static Logger logger = LoggerFactory.getLogger(Loader.class);
 
 	public static void main(String args[]) throws Exception {
@@ -34,7 +40,8 @@ public class Loader {
 	}
 	
 	private void execute(String args[]) {
-		ApplicationContext ctx = null;
+		// TODO: Need to implement Guice binding for this to work
+		
         /*
          * Get Properties from loader.properties file. 
          * If the file does not exist, use default values
@@ -54,12 +61,6 @@ public class Loader {
         String numCustomers = props.getProperty("loader.numCustomers","100");
     	System.setProperty("loader.numCustomers", numCustomers);
 
-    	// TODO:  Later add back in other implementations
-		ctx = new AnnotationConfigApplicationContext(CassandraAstyanaxConfig.class);
-		
-		FlightLoader flightLoader = ctx.getBean(FlightLoader.class);
-		CustomerLoader customerLoader = ctx.getBean(CustomerLoader.class);
-		
 		try {
 			long start = System.currentTimeMillis();
 			logger.info("Start loading flights");
