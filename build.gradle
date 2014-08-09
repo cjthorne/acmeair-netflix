@@ -1,37 +1,33 @@
 defaultTasks 'clean', 'build'
 
 buildscript {
-    repositories { mavenCentral() }
+	repositories { mavenCentral() }
 }
 
 allprojects {
-    repositories {
-        mavenCentral()
-    }
+	repositories { mavenCentral() }
 }
 
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'eclipse'
-	
-    group = "com.acmeair.${rootProject.name}"
-    version = rootProject.version
-    sourceCompatibility = 1.6
-    
-    dependencies {
-		compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.hystrix:hystrix-core:1.3.16'
-        compile 'com.netflix.ribbon:ribbon-core:0.3.12'
-        compile 'com.netflix.ribbon:ribbon-httpclient:0.3.12'
-        compile 'com.netflix.karyon:karyon-core:1.0.25'
-        compile 'javax:javaee-web-api:6.0'
-		compile 'org.slf4j:slf4j-api:1.7.2'
-    }
-}	
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '1.9'
+	group = "com.acmeair.${rootProject.name}"
+	version = rootProject.version
+	sourceCompatibility = 1.6
+
+	dependencies {
+		compile 'com.google.inject.extensions:guice-servlet:3.0'
+		compile 'com.netflix.hystrix:hystrix-core:1.3.16'
+		compile 'com.netflix.ribbon:ribbon-core:0.3.12'
+		compile 'com.netflix.ribbon:ribbon-httpclient:0.3.12'
+		compile 'com.netflix.karyon:karyon-core:1.0.25'
+		compile 'javax:javaee-web-api:6.0'
+		compile 'org.slf4j:slf4j-api:1.7.2'
+	}
 }
+
+task wrapper(type: Wrapper) { gradleVersion = '1.9' }
 
 project(':acmeair-common') {
 	dependencies {
@@ -54,78 +50,78 @@ project(':acmeair-services-cassandra') {
 
 project(':acmeair-webapp') {
 	apply plugin: 'war'
-	
-	dependencies {
-		compile project(':acmeair-common')
-		compile project(':acmeair-services')
-		compile project(':acmeair-services-cassandra')
-		
-		// logging
-		// netflix uses slf4j 
-		runtime 'org.slf4j:slf4j-api:1.7.2'
-		// use log4j under slf4j
-		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
-		
-		// jersey
-		runtime 'com.sun.jersey:jersey-server:1.17.1'
-        runtime 'com.sun.jersey:jersey-core:1.17.1'
-        runtime 'com.sun.jersey:jersey-bundle:1.17.1'
-        runtime 'com.sun.jersey:jersey-json:1.17.1'
-		
-		// netflix runtime components
-		runtime 'com.netflix.karyon:karyon-extensions:1.0.25'
-		runtime 'com.netflix.hystrix:hystrix-metrics-event-stream:1.3.16'
-		runtime 'com.netflix.ribbon:ribbon-eureka:0.3.12'
-		
-		// skip the JEE components that this app server provides
-		providedRuntime 'javax:javaee-web-api:6.0'
-		providedRuntime 'javax.servlet:servlet-api:2.5'
-		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
-	}
-	
-	war {
-		from '../acmeair-webapp/src/main/webapp'
-	}
-}
 
-project(':acmeair-auth-service') {
-	apply plugin: 'war'
-	
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-cassandra')
-		
+
 		// logging
 		// netflix uses slf4j
 		runtime 'org.slf4j:slf4j-api:1.7.2'
 		// use log4j under slf4j
 		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
-		
+		// don't include slf4j simple
+		providedRuntime 'org.slf4j:slf4j-simple:1.7.0@jar'
+
 		// jersey
 		runtime 'com.sun.jersey:jersey-server:1.17.1'
 		runtime 'com.sun.jersey:jersey-core:1.17.1'
 		runtime 'com.sun.jersey:jersey-bundle:1.17.1'
 		runtime 'com.sun.jersey:jersey-json:1.17.1'
-		
+
 		// netflix runtime components
 		runtime 'com.netflix.karyon:karyon-extensions:1.0.25'
+		runtime 'com.netflix.hystrix:hystrix-metrics-event-stream:1.3.16'
+		runtime 'com.netflix.ribbon:ribbon-eureka:0.3.12'
+		runtime 'com.netflix.karyon:karyon-admin-web:1.0.25'
 		
 		// skip the JEE components that this app server provides
 		providedRuntime 'javax:javaee-web-api:6.0'
-		providedRuntime 'javax.servlet:servlet-api:2.5'
+		providedRuntime 'javax.servlet:servlet-api:2.5@jar'
+		providedRuntime 'org.mortbay.jetty:servlet-api:2.5-20081211@jar'
 		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
 	}
-	
-	war {
-		from '../acmeair-auth-service/src/main/webapp'
+}
+
+project(':acmeair-auth-service') {
+	apply plugin: 'war'
+
+	dependencies {
+		compile project(':acmeair-common')
+		compile project(':acmeair-services')
+		compile project(':acmeair-services-cassandra')
+
+		// logging
+		// netflix uses slf4j
+		runtime 'org.slf4j:slf4j-api:1.7.2'
+		// use log4j under slf4j
+		runtime 'org.slf4j:slf4j-log4j12:1.7.2'
+		// don't include slf4j simple
+		providedRuntime 'org.slf4j:slf4j-simple:1.7.0@jar'
+
+		// jersey
+		runtime 'com.sun.jersey:jersey-server:1.17.1'
+		runtime 'com.sun.jersey:jersey-core:1.17.1'
+		runtime 'com.sun.jersey:jersey-bundle:1.17.1'
+		runtime 'com.sun.jersey:jersey-json:1.17.1'
+
+		// netflix runtime components
+		runtime 'com.netflix.karyon:karyon-extensions:1.0.25'
+		runtime 'com.netflix.karyon:karyon-admin-web:1.0.25'
+		
+		// skip the JEE components that this app server provides
+		providedRuntime 'javax:javaee-web-api:6.0'
+		providedRuntime 'javax.servlet:servlet-api:2.5@jar'
+		providedRuntime 'org.mortbay.jetty:servlet-api:2.5-20081211@jar'
+		providedRuntime 'org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518'
 	}
 }
 
 project(':acmeair-loader') {
 	apply plugin: 'application'
 	mainClassName = 'com.acmeair.loader.Loader'
-	
+
 	dependencies {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
