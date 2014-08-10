@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 public class AuthTokenREST {
 	private static final Logger logger = LoggerFactory.getLogger(AuthTokenREST.class);
 
-	@Inject // TODO: Need to figure out how to force the container to do this for me
-	private CustomerService customerService = AuthServiceGuiceContextListener.getAuthInjector().getInstance(CustomerService.class);
+	@Inject
+	private CustomerService customerService;
 	
 	@Context 
 	private HttpServletRequest request;
@@ -52,7 +52,6 @@ public class AuthTokenREST {
 	@Path("{tokenid}")
 	@Produces("application/json")
 	public Response validateToken(@PathParam("tokenid") String tokenid) {
-		logger.info("customerService = " + customerService);
 		CustomerSession cs = customerService.validateSession(tokenid);
 		if (cs == null) {
 			throw new WebApplicationException(404);

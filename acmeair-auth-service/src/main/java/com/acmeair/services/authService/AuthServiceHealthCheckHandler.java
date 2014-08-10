@@ -18,10 +18,8 @@ package com.acmeair.services.authService;
 import com.netflix.karyon.spi.HealthCheckHandler;
 
 public class AuthServiceHealthCheckHandler implements HealthCheckHandler {
-
 	@Override
 	public int getStatus() {
-		// TODO:  AWS - Understand if this is being called
 		return 200;
 	}
 }

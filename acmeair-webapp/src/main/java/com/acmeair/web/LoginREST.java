@@ -28,10 +28,10 @@ import com.acmeair.web.hystrixcommands.*;
 @Path("/login")
 @Singleton
 public class LoginREST {
-	
 	public static String SESSIONID_COOKIE_NAME = "sessionid";
-	@Inject // TODO: Need to figure out how to force the container to do this for me
-	private CustomerService customerService = WebAppGuiceContextListener.getWebAppInjector().getInstance(CustomerService.class);
+	
+	@Inject
+	private CustomerService customerService;
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})

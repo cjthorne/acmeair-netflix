@@ -29,8 +29,8 @@ import com.acmeair.service.BookingService;
 
 @Path("/bookings")
 public class BookingsREST {
-	@Inject // TODO: Need to figure out how to force the container to do this for me
-	private BookingService bs = WebAppGuiceContextListener.getWebAppInjector().getInstance(BookingService.class);
+	@Inject
+	private BookingService bs;
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})

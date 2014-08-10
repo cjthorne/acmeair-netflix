@@ -41,39 +41,17 @@ public class RESTCookieSessionFilter implements Filter {
 	private static final String LOGIN_PATH = "/rest/api/login";
 	private static final String LOGOUT_PATH = "/rest/api/login/logout";
 	
-//	private TransactionService transactionService = null; 
-//	private boolean initializedTXService = false;
-	
 	@Override
 	public void destroy() {
 	}
 
-//	private TransactionService getTxService()
-//	{
-//		if (!this.initializedTXService)
-//		{
-//			this.initializedTXService = true;
-//			transactionService = ServiceLocator.getService(TransactionService.class);
-//		}
-//		
-//		return transactionService;
-//	}
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp,	FilterChain chain) throws IOException, ServletException {
 		try {
 		HttpServletRequest request = (HttpServletRequest)req;
 		HttpServletResponse response = (HttpServletResponse)resp;
 		
-		String path = request.getContextPath() + request.getServletPath() + request.getPathInfo();
-		// The following code is to ensure that OG is always set on the thread
-//		try{
-//			TransactionService txService = getTxService();
-//			if (txService!=null)
-//				txService.prepareForTransaction();
-//		}catch( Exception e)
-//		{
-//			e.printStackTrace();
-//		}
+		String path = request.getServletPath();
 		// could do .startsWith for now, but plan to move LOGOUT to its own REST interface eventually
 		if (path.endsWith(LOGIN_PATH) || path.endsWith(LOGOUT_PATH)) {
 			// if logging in, let the request flow

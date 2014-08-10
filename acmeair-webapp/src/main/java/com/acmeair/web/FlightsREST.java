@@ -32,8 +32,8 @@ import com.acmeair.web.TripLegInfo;
 
 @Path("/flights")
 public class FlightsREST {
-	@Inject // TODO: Need to figure out how to force the container to do this for me
-	private FlightService flightService = WebAppGuiceContextListener.getWebAppInjector().getInstance(FlightService.class);
+	@Inject
+	private FlightService flightService;
 	
 	// TODO:  Consider a pure GET implementation of this service, but maybe not much value due to infrequent similar searches
 	@POST

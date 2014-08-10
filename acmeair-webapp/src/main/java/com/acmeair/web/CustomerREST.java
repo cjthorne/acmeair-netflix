@@ -28,8 +28,8 @@ import javax.ws.rs.core.Context;
 @Path("/customer")
 @Singleton
 public class CustomerREST {
-	@Inject // TODO: Need to figure out how to force the container to do this for me
-	private CustomerService customerService = WebAppGuiceContextListener.getWebAppInjector().getInstance(CustomerService.class);
+	@Inject
+	private CustomerService customerService;
 	
 	@Context 
 	private HttpServletRequest request;

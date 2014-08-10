@@ -55,6 +55,8 @@ project(':acmeair-webapp') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-cassandra')
+		compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
+		compile 'com.sun.jersey:jersey-bundle:1.17.1'
 
 		// logging
 		// netflix uses slf4j
@@ -66,8 +68,6 @@ project(':acmeair-webapp') {
 
 		// jersey
 		runtime 'com.sun.jersey:jersey-server:1.17.1'
-		runtime 'com.sun.jersey:jersey-core:1.17.1'
-		runtime 'com.sun.jersey:jersey-bundle:1.17.1'
 		runtime 'com.sun.jersey:jersey-json:1.17.1'
 
 		// netflix runtime components
@@ -91,7 +91,9 @@ project(':acmeair-auth-service') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-cassandra')
-
+		compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
+		compile 'com.sun.jersey:jersey-bundle:1.17.1'
+		
 		// logging
 		// netflix uses slf4j
 		runtime 'org.slf4j:slf4j-api:1.7.2'
@@ -102,8 +104,6 @@ project(':acmeair-auth-service') {
 
 		// jersey
 		runtime 'com.sun.jersey:jersey-server:1.17.1'
-		runtime 'com.sun.jersey:jersey-core:1.17.1'
-		runtime 'com.sun.jersey:jersey-bundle:1.17.1'
 		runtime 'com.sun.jersey:jersey-json:1.17.1'
 
 		// netflix runtime components

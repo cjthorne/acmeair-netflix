@@ -8,31 +8,8 @@
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
-	<servlet>
-  		<servlet-name>jersey-servlet</servlet-name>
-  		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-  		<init-param>
-  			<param-name>com.sun.jersey.config.property.packages</param-name>
-  			<param-value>com.acmeair.services.authService</param-value>
-  		</init-param>
-		<init-param>
-  			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
-  			<param-value>true</param-value>
-  		</init-param>
-  		<load-on-startup>1</load-on-startup>
-    </servlet>
-    
-	<servlet-mapping>
-		<servlet-name>jersey-servlet</servlet-name>
-		<url-pattern>/rest/api/*</url-pattern>
-	</servlet-mapping>
-	
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
-    </listener>
-    
-    <listener>
-        <listener-class>com.acmeair.services.authService.AuthServiceGuiceContextListener</listener-class>
     </listener>
     
     <filter>
