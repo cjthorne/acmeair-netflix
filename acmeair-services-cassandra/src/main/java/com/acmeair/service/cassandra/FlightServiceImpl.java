@@ -172,10 +172,10 @@ public class FlightServiceImpl implements FlightService {
 			
 			BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS);
 			bs.bind(segment.getFlightName(), departureTime);
-			log.info("bs = " + bs);
-			log.info("statement = " + SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS.getQueryString());
-			log.info("bound values = " + segment.getFlightName() + " " + deptDate);
-			log.info("departureTime = " + departureTime);
+			log.debug("bs = " + bs);
+			log.debug("statement = " + SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS.getQueryString());
+			log.debug("bound values = " + segment.getFlightName() + " " + deptDate);
+			log.debug("departureTime = " + departureTime);
 			ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
 			for (Row row : rs) {
 				String flight_id = row.getString("flight_id");
