@@ -19,17 +19,21 @@ import com.acmeair.entities.Customer;
 import com.acmeair.entities.CustomerAddress;
 import com.acmeair.entities.Customer.PhoneType;
 import com.acmeair.service.CustomerService;
+import com.netflix.config.DynamicPropertyFactory;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class CustomerLoader {
+	private static final int NUM_CUSTOMERS = DynamicPropertyFactory.getInstance().getIntProperty("com.acmeair.loader.numCustomers", 10000).get();
 
-	@Resource
+	@Inject
 	private CustomerService customerService;
 
-	public void loadCustomers(long numCustomers) {
+	public void loadCustomers() {
+		int numCustomers = NUM_CUSTOMERS;
+		
 		CustomerAddress address = new CustomerAddress("123 Main St.", null, "Anytown", "NC", "USA", "27617");
 		for (long ii = 0; ii < numCustomers; ii++) {
 			customerService.createCustomer("uid"+ii+"@email.com", "password", Customer.MemberShipStatus.GOLD, 1000000, 1000, "919-123-4567", PhoneType.BUSINESS, address);

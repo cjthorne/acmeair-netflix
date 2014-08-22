@@ -21,20 +21,19 @@ import java.io.LineNumberReader;
 import java.util.*;
 import java.math.*;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.acmeair.entities.AirportCodeMapping;
 import com.acmeair.entities.FlightSegment;
 import com.acmeair.service.FlightService;
+import com.netflix.config.DynamicPropertyFactory;
 
 @Singleton
 public class FlightLoader {
+	private static final int MAX_FLIGHTS_PER_SEGMENT = DynamicPropertyFactory.getInstance().getIntProperty("com.acmeair.loader.maxFlightsPerSegment", 30).get();
 	
-	// TODO: size this back for now
-	private static final int MAX_FLIGHTS_PER_SEGMENT = 1;
-	
-	@Resource
+	@Inject
 	private FlightService flightService;
 	
 	public void loadFlights() throws Exception {

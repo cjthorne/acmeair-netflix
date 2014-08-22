@@ -15,65 +15,44 @@
 *******************************************************************************/
 package com.acmeair.loader;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.netflix.config.DynamicPropertyFactory;
+
 public class Loader {
-	@Inject
-	FlightLoader flightLoader;
-	
-	@Inject
-	CustomerLoader customerLoader;
-	
 	private static Logger logger = LoggerFactory.getLogger(Loader.class);
 
 	public static void main(String args[]) throws Exception {
 		Loader loader = new Loader();
-		loader.execute(args);
+		loader.load();
 	}
 	
-	private void execute(String args[]) {
-		// TODO: Need to implement Guice binding for this to work
+	private void load() {
 		
-        /*
-         * Get Properties from loader.properties file. 
-         * If the file does not exist, use default values
-         */
-		Properties props = new Properties();
-		String propFileName = "/loader.properties";
-		try{			
-			InputStream propFileStream = Loader.class.getResourceAsStream(propFileName);
-			props.load(propFileStream);
-		//	props.load(new FileInputStream(propFileName));
-		}catch(FileNotFoundException e){
-			logger.info("Property file " + propFileName + " not found.");
-		}catch(IOException e){
-			logger.info("IOException - Property file " + propFileName + " not found.");
-		}
-		
-        String numCustomers = props.getProperty("loader.numCustomers","100");
-    	System.setProperty("loader.numCustomers", numCustomers);
-
+		Injector injector = Guice.createInjector(new LoaderGuiceModule());
+	    
 		try {
+			FlightLoader flightLoader = injector.getInstance(FlightLoader.class);
+			CustomerLoader customerLoader = injector.getInstance(CustomerLoader.class);
 			long start = System.currentTimeMillis();
 			logger.info("Start loading flights");
 			flightLoader.loadFlights();
-			logger.info("Start loading " +  numCustomers + " customers");
-			customerLoader.loadCustomers(Long.parseLong(numCustomers));
+			logger.info("Ended loading flights");
+			logger.info("Start loading customers");
+			customerLoader.loadCustomers();
+			logger.info("Ended loading customers");
 			long stop = System.currentTimeMillis();
+
 			// TODO: Needed in datastax based loader, if removed, remove from here too
 			flightLoader.closeDatasource();
+			
 			logger.info("Finished loading in " + (stop - start)/1000.0 + " seconds");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}	
 }

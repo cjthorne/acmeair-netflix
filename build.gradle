@@ -126,6 +126,8 @@ project(':acmeair-loader') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile project(':acmeair-services-cassandra')
+		compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
+		compile 'com.netflix.archaius:archaius-core:0.6.0'
 	}
 }
 
