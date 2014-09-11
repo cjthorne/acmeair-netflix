@@ -28,18 +28,16 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private static Logger log = LoggerFactory.getLogger(CustomerServiceImpl.class);
 	
+	
 	@Inject
 	KeyGenerator keyGenerator;
 
-	static {
-		prepareStatements();
-	}
-	
 	private static PreparedStatement INSERT_INTO_CUSTOMER_PS;
 	private static PreparedStatement SELECT_ALL_FROM_CUSTOMER_BY_USERNAME_PS;
 	private static PreparedStatement INSERT_INTO_CUSTOMER_SESSION_PS;
 	private static PreparedStatement SELECT_ALL_FROM_CUSTOMER_SESSION_BY_SESSION_ID_PS;
 	private static PreparedStatement DELETE_FROM_CUSTOMER_SESSION_BY_SESSION_ID_PS;
+	private static boolean statementsPrepared = false;
 	
 	private static void prepareStatements() {
 		INSERT_INTO_CUSTOMER_PS = CUtils.getAcmeAirSession().prepare(
@@ -59,6 +57,7 @@ public class CustomerServiceImpl implements CustomerService {
 		DELETE_FROM_CUSTOMER_SESSION_BY_SESSION_ID_PS = CUtils.getAcmeAirSession().prepare(
 			"DELETE FROM customer_session where session_id = ?;"
 		);
+		statementsPrepared = true;
 	}
 	
 	public Customer createCustomer(String username, String password,
@@ -71,6 +70,7 @@ public class CustomerServiceImpl implements CustomerService {
 	
 	
 	private Customer upsertCustomer(Customer customer) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(INSERT_INTO_CUSTOMER_PS);
 		bs.bind(customer.getUsername(), customer.getPassword(), customer.getStatus().toString(), customer.getTotal_miles(),
 			customer.getMiles_ytd(), customer.getAddress().getStreetAddress1(), customer.getAddress().getStreetAddress2(),
@@ -88,6 +88,7 @@ public class CustomerServiceImpl implements CustomerService {
 	
 
 	private Customer getCustomer(String username) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_CUSTOMER_BY_USERNAME_PS);
 		bs.bind(username);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -153,6 +154,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerSession validateSession(String sessionid) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_CUSTOMER_SESSION_BY_SESSION_ID_PS);
 		bs.bind(sessionid);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -174,6 +176,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerSession createSession(String customerId) {
+		if (!statementsPrepared) { prepareStatements(); }
 		String sessionId = keyGenerator.generate().toString();
 		Date now = new Date();
 		Calendar c = Calendar.getInstance();
@@ -190,6 +193,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public void invalidateSession(String sessionid) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(DELETE_FROM_CUSTOMER_SESSION_BY_SESSION_ID_PS);
 		bs.bind(sessionid);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);

@@ -45,6 +45,7 @@ project(':acmeair-services-cassandra') {
 		compile project(':acmeair-common')
 		compile project(':acmeair-services')
 		compile 'com.datastax.cassandra:cassandra-driver-core:1.0.5'
+		compile 'com.netflix.eureka:eureka-client:1.1.126'
 	}
 }
 

@@ -73,10 +73,7 @@ public class FlightServiceImpl implements FlightService {
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_PS;
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_ID_PS;
 	private static PreparedStatement SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_DEPARTURE_DATE_PS;
-	
-	static {
-		prepareStatements();
-	}
+	private static boolean statementsPrepared = false;
 	
 	private static void prepareStatements() {
 		INSERT_INTO_FLIGHT_SEGMENT_PS = CUtils.getAcmeAirSession().prepare(
@@ -102,10 +99,12 @@ public class FlightServiceImpl implements FlightService {
 		INSERT_INTO_AIRPORT_CODE_MAPPING_PS = CUtils.getAcmeAirSession().prepare(
 			"INSERT INTO airport_code_mapping (airport_code, airport_name) VALUES (?, ?);"
 		);
+		statementsPrepared = true;
 	}
 	
 	@Override
 	public Flight getFlightByFlightKey(FlightPK key) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_AND_ID_PS);
 		bs.bind(key.getFlightSegmentId(), key.getId());
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -138,6 +137,7 @@ public class FlightServiceImpl implements FlightService {
 	@Override
 	public List<Flight> getFlightByAirportsAndDepartureDate(String fromAirport,
 			String toAirport, Date deptDate) {
+		if (!statementsPrepared) { prepareStatements(); }
 		// TODO: Understand if this should be moved to REST or Web 2.0 tier
 		// wasn't needed in WXS version, but without it timezone doesn't match
 		// on exact compare in Cassandra
@@ -199,6 +199,7 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public List<Flight> getFlightByAirports(String fromAirport, String toAirport) {
+		if (!statementsPrepared) { prepareStatements(); }
 		FlightSegment segment = getFlightSegment(fromAirport, toAirport);
 		
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_FLIGHT_BY_SEGMENT_PS);
@@ -224,6 +225,7 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public void storeAirportMapping(AirportCodeMapping mapping) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(INSERT_INTO_AIRPORT_CODE_MAPPING_PS);
 		bs.bind(mapping.getAirportCode(), mapping.getAirportName());
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -235,6 +237,7 @@ public class FlightServiceImpl implements FlightService {
 			BigDecimal firstClassBaseCost, BigDecimal economyClassBaseCost,
 			int numFirstClassSeats, int numEconomyClassSeats,
 			String airplaneTypeId) {
+		if (!statementsPrepared) { prepareStatements(); }
 		String id = keyGenerator.generate().toString();
 		Flight flight = new Flight(id, flightSegmentId,
 			scheduledDepartureTime, scheduledArrivalTime,
@@ -254,6 +257,7 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public void storeFlightSegment(FlightSegment flightSeg) {		
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(INSERT_INTO_FLIGHT_SEGMENT_PS);
 		bs.bind(flightSeg.getFlightName(), flightSeg.getOriginPort(), flightSeg.getDestPort(), flightSeg.getMiles());
 
@@ -261,6 +265,7 @@ public class FlightServiceImpl implements FlightService {
 	}
 	
 	private FlightSegment getFlightSegment(String originPort, String destPort) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_FLIGHT_SEGMENT_BY_PORTS_PS);
 		bs.bind(originPort, destPort);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);

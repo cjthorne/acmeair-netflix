@@ -37,16 +37,13 @@ public class BookingServiceImpl implements BookingService {
 	private static PreparedStatement SELECT_ALL_FROM_BOOKING_BY_USER_ID_AND_BOOKING_ID_PS;
 	private static PreparedStatement SELECT_ALL_BOOKINGS_BY_USER_ID_PS;
 	private static PreparedStatement DELETE_FROM_BOOKING_BY_USER_ID_AND_BOOKING_ID_PS;
+	private static boolean statementsPrepared = false;
 
 	@Inject
 	KeyGenerator keyGenerator;
 	
 	private static Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
 
-	static {
-		prepareStatements();
-	}
-	
 	private static void prepareStatements() {
 		INSERT_INTO_BOOKING_PS = CUtils.getAcmeAirSession().prepare(
 			"INSERT INTO booking (customer_id, booking_id, flight_id, flight_segment_id, booking_date) VALUES (?, ?, ?, ?, ?);"
@@ -60,10 +57,12 @@ public class BookingServiceImpl implements BookingService {
 		SELECT_ALL_BOOKINGS_BY_USER_ID_PS = CUtils.getAcmeAirSession().prepare(
 			"SELECT * FROM booking where customer_id = ?;"
 		);
+		statementsPrepared = true;
 	}
 
 	@Override
 	public BookingPK bookFlight(String customerId, FlightPK flightId) {
+		if (!statementsPrepared) { prepareStatements(); }
 		String bookingId = keyGenerator.generate().toString();
 		Date dateOfBooking = new Date();
 		BookingPK key = new BookingPK(customerId, bookingId);
@@ -76,6 +75,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public Booking getBooking(String user, String id) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_BOOKING_BY_USER_ID_AND_BOOKING_ID_PS);
 		bs.bind(user, id);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -100,6 +100,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public List<Booking> getBookingsByUser(String user) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(SELECT_ALL_BOOKINGS_BY_USER_ID_PS);
 		bs.bind(user);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
@@ -122,6 +123,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public void cancelBooking(String user, String id) {
+		if (!statementsPrepared) { prepareStatements(); }
 		BoundStatement bs = new BoundStatement(DELETE_FROM_BOOKING_BY_USER_ID_AND_BOOKING_ID_PS);
 		bs.bind(user, id);
 		ResultSet rs = CUtils.getAcmeAirSession().execute(bs);
