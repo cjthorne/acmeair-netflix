@@ -4,7 +4,11 @@ deploy:
   provider: releases
   api_key:
     secure: fkxbuf9zLfyXS6Qef9kRDBohRLqbEfjZ1P8wF7rDZmdBiPHiVYG8CEvCrY5/k2U8m5TkdBNyYVkTkjO8rDj0QnLW/+2HThJ/4kALt+8Ul2CNS6ITDEGWTYOc0dwaBGM5dFPg+ht9p0hGKPi1BmG3sBq/8HGzi21UPa+XHY3nNr8=
-  file: acmeair-webapp-tc7/build/libs/acmeair-webapp-tc7-0.1.0-SNAPSHOT.war
+  file: 
+    - acmeair-webapp-tc7/build/libs/acmeair-webapp-tc7-0.1.0-SNAPSHOT.war
+    - acmeair-loader/build/distributions/acmeair-loader-0.1.0-SNAPSHOT.zip
+    - acmeair-auth-service-tc7/build/libs/acmeair-auth-service-tc7-0.1.0-SNAPSHOT.war
+    - acmeair-services-astyanax/src/main/resources/acmeair-cql.txt
   on:
     tags: true
     all_branches: true
